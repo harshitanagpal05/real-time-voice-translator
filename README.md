@@ -1,16 +1,54 @@
-# React + Vite
+# 🌍 Real-Time Voice Translator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web-based real-time translation application that converts live speech or video input into multiple languages instantly. Built with modern web technologies, the app provides a clean UI, real-time subtitles, translation history, and basic analytics.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Live Demo
+🔗 https://real-time-voice-translator-woad.vercel.app
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Features
+- 🎤 **Audio Mode** – Translate live spoken input
+- 📹 **Video Mode** – Camera input with real-time subtitles
+- 🌐 **Multi-language Support** – Translate between popular languages
+- 📝 **Translation History** – View previous translations
+- 📊 **Analytics Dashboard** – Visual insights of language usage
+- ⚡ **Real-time Updates** – Instant translation feedback
+- 🎨 **Modern UI** – Clean, responsive, and user-friendly design
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠️ Tech Stack
+- **Frontend:** React + Vite
+- **Styling:** CSS (custom modern UI)
+- **APIs:** Browser Speech Recognition API, MyMemory Translation API
+- **Deployment:** Vercel
+- **Version Control:** Git & GitHub
+
+---
+
+## 📂 Project Structure
+├── src/
+│ ├── App.jsx
+│ ├── App.css
+│ └── main.jsx
+├── public/
+├── index.html
+├── package.json
+└── vite.config.js
+🌍 Deployment
+
+This project is deployed on Vercel with automatic CI/CD.
+Any push to the main branch triggers an automatic redeployment.
+
+📌 Notes
+
+Microphone and camera permissions are required for full functionality.
+
+Best experienced on modern Chromium-based browsers.
+
+👩‍💻 Author
+
+Harshita Nagpal
