@@ -1,0 +1,116 @@
+.voice-orb-container {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-orb-container canvas {
+  width: 100% !important;
+  height: 380px !important;
+}
+
+.orb-mic-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -58%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.orb-mic-icon {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 0 16px rgba(255, 140, 0, 0.5));
+  transition: all 0.5s ease;
+}
+
+.orb-mic-icon svg {
+  width: 36px;
+  height: 36px;
+}
+
+.orb-mic-icon.listening {
+  color: #FF8C00;
+  filter: drop-shadow(0 0 24px rgba(255, 140, 0, 0.8));
+  animation: micPulse 1.5s ease-in-out infinite;
+}
+
+.orb-mic-icon.speaking {
+  color: #E040FB;
+  filter: drop-shadow(0 0 24px rgba(224, 64, 251, 0.8));
+  animation: micPulse 1s ease-in-out infinite;
+}
+
+.orb-mic-icon.translating {
+  color: #9C27B0;
+  filter: drop-shadow(0 0 20px rgba(156, 39, 176, 0.7));
+}
+
+@keyframes micPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.orb-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  color: var(--text-secondary);
+  transition: all 0.5s ease;
+  margin-top: -20px;
+  z-index: 3;
+}
+
+.orb-status.listening {
+  color: #FF8C00;
+  border-color: rgba(255, 140, 0, 0.3);
+  box-shadow: 0 0 30px rgba(255, 140, 0, 0.15);
+}
+
+.orb-status.speaking {
+  color: #E040FB;
+  border-color: rgba(224, 64, 251, 0.3);
+  box-shadow: 0 0 30px rgba(224, 64, 251, 0.15);
+}
+
+.orb-status.translating {
+  color: #9C27B0;
+  border-color: rgba(156, 39, 176, 0.3);
+  box-shadow: 0 0 30px rgba(156, 39, 176, 0.15);
+}
+
+.orb-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+.orb-status.idle .orb-status-dot {
+  background: var(--text-secondary);
+  animation: none;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
