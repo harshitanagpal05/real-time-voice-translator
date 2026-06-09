@@ -1,0 +1,192 @@
+/**
+ * DashboardPage — Main translator workspace (center + history panel).
+ */
+
+import { useRef, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
+import useTranslator from '../hooks/useTranslator';
+import { SPEECH_SYNTHESIS_LANG } from '../constants/languages';
+import RecentHistoryPanel from '../components/RecentHistoryPanel/RecentHistoryPanel';
+import VoiceOrb from '../components/VoiceOrb/VoiceOrb';
+import AudioVisualizer from '../components/AudioVisualizer/AudioVisualizer';
+import TranslatorPanel from '../components/TranslatorPanel/TranslatorPanel';
+import './DashboardPage.css';
+
+function getStatusLabel({ error, isListening, isTranslating, isSpeaking }) {
+  if (error) return 'Error';
+  if (isListening) return 'Listening...';
+  if (isTranslating) return 'Translating...';
+  if (isSpeaking) return 'Speaking...';
+  return 'Ready';
+}
+
+export default function DashboardPage() {
+  const { user } = useAuth();
+  const { settings } = useSettings();
+  const navigate = useNavigate();
+  const translateRef = useRef(null);
+  const historyRef = useRef(null);
+  const languagesRef = useRef(null);
+
+  const {
+    sourceLang, targetLang,
+    originalText, translatedText,
+    isListening, isTranslating, isSpeaking,
+    voiceEnabled, error, history,
+    setSourceLang, setTargetLang, setVoiceEnabled,
+    startListening, stopListening, swapLanguages, clearHistory,
+    speakTranslation, clearError,
+  } = useTranslator();
+
+  useEffect(() => {
+    setSourceLang(settings.defaultSourceLang);
+    setTargetLang(settings.defaultTargetLang);
+    setVoiceEnabled(settings.aiVoiceEnabled);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.defaultSourceLang, settings.defaultTargetLang, settings.aiVoiceEnabled]);
+
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash === 'history' || hash === 'languages') {
+      setTimeout(() => {
+        document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' });
+      }, 200);
+    }
+  }, []);
+
+  const speakHistoryItem = useCallback((text, lang) => {
+    if (!text) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = SPEECH_SYNTHESIS_LANG[lang] || lang;
+    u.rate = settings.voiceSpeed || 1;
+    window.speechSynthesis.speak(u);
+  }, [settings.voiceSpeed]);
+
+  const statusLabel = getStatusLabel({ error, isListening, isTranslating, isSpeaking });
+  const statusActive = isListening || isTranslating || isSpeaking;
+  const statusError = !!error;
+
+  return (
+    <div className="dashboard-page-inner">
+      <main className="dashboard-center">
+        <header className="dash-top-header">
+          <div>
+            <h1 className="dash-brand">VoxAI</h1>
+            <p className="dash-tagline">
+              <span className="dash-tagline-gradient">Speak. Translate. Connect.</span>
+            </p>
+            <p className="dash-desc">Real-time AI Voice Translation across multiple languages.</p>
+          </div>
+          <div className="dash-header-right">
+            <label className="dash-voice-toggle">
+              <input
+                type="checkbox"
+                checked={voiceEnabled}
+                onChange={() => setVoiceEnabled((v) => !v)}
+              />
+              <span>Auto voice output</span>
+            </label>
+            {user?.isAdmin && (
+              <button type="button" className="dash-link-btn" onClick={() => navigate('/admin')}>Admin</button>
+            )}
+            <button type="button" className="dash-link-btn" onClick={() => navigate('/analytics')}>Analytics</button>
+          </div>
+        </header>
+
+        <AnimatePresence>
+          {error && (
+            <motion.div className="dash-error" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+              {error}
+              <button type="button" onClick={clearError} className="dash-error-dismiss" aria-label="Dismiss">×</button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <section className="dash-orb-area" ref={translateRef}>
+          <AudioVisualizer isListening={isListening} isSpeaking={isSpeaking} isTranslating={isTranslating} />
+          <VoiceOrb isListening={isListening} isSpeaking={isSpeaking} isTranslating={isTranslating} showStatus={false} />
+          <div className={`dash-listening-label ${statusError ? 'error' : ''} ${statusActive ? 'active' : ''}`}>
+            <span className={`dash-live-dot ${statusActive ? 'on' : ''} ${statusError ? 'error' : ''}`} />
+            {statusLabel}
+          </div>
+        </section>
+
+        <div className="dash-controls-row">
+          {!isListening ? (
+            <motion.button
+              type="button"
+              className="dash-control-btn start"
+              onClick={startListening}
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              id="start-btn"
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <path d="M12 14c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v5c0 1.66 1.34 3 3 3z" />
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+              </svg>
+              Start Translation
+            </motion.button>
+          ) : (
+            <motion.button
+              type="button"
+              className="dash-control-btn stop"
+              onClick={stopListening}
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              id="stop-btn"
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+              </svg>
+              Stop Translation
+            </motion.button>
+          )}
+        </div>
+
+        <section className="dash-cards-area" id="languages" ref={languagesRef}>
+          <TranslatorPanel
+            originalText={originalText}
+            translatedText={translatedText}
+            sourceLang={sourceLang}
+            targetLang={targetLang}
+            isListening={isListening}
+            isTranslating={isTranslating}
+            isSpeaking={isSpeaking}
+            onSourceChange={setSourceLang}
+            onTargetChange={setTargetLang}
+            onSwap={swapLanguages}
+            onSpeak={speakTranslation}
+          />
+        </section>
+
+        <section className="dash-features">
+          {['Real-time Translation', 'Multi-Language', 'AI Voice Recognition', 'Natural Voice Output'].map((f) => (
+            <div key={f} className="dash-feature-chip">{f}</div>
+          ))}
+        </section>
+
+        <footer className="dash-footer">
+          <div className="dash-footer-left">
+            <span className="dash-footer-live"><span className="dash-live-dot on" /> Live</span>
+            <span>Powered by AI</span>
+            <span>12+ Languages</span>
+            <span>Secure &amp; Private</span>
+          </div>
+        </footer>
+      </main>
+
+      <div id="history" ref={historyRef}>
+        <RecentHistoryPanel
+          history={history}
+          onClear={clearHistory}
+          onSpeak={speakHistoryItem}
+        />
+      </div>
+    </div>
+  );
+}
