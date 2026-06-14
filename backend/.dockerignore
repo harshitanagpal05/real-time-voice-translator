@@ -1,0 +1,10 @@
+node_modules
+.env
+.env.local
+*.log
+.git
+users.db
+API
+CLI
+.vscode
+.idea

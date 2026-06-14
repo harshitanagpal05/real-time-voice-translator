@@ -1,0 +1,10 @@
+Original (english): hello
+Translated (japanese): こんにちは
+Original (english): how
+Translated (japanese): どうやって
+Original (english): how are you
+Translated (japanese): 元気ですか？
+Original (english): are you dumb
+Translated (japanese): あなたは愚かですか
+Original (english): ok ok
+Translated (japanese): わかりましたOK

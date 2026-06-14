@@ -1,0 +1,283 @@
+
+--- New Session: 2025-07-22 11:09:56.399397 ---
+You said: hello
+Translated: नमस्ते
+
+You said: kaise hain aap
+Translated: कैस है
+
+You said: how
+Translated: कैसे
+
+You said: are you dumb
+Translated: क्या तुम गूंगे हो
+
+
+--- New Session: 2025-07-23 16:28:05.812361 ---
+You said: hello hello
+Translated: नमस्ते नमस्ते
+
+
+--- New Session: 2025-07-23 16:29:11.322671 ---
+You said: how are you
+Translated: आप कैसे हैं
+
+You said: hello
+Translated: नमस्ते
+
+You said: hello
+Translated: नमस्ते
+
+[2025-07-23 16:37:36.282720]
+Input: hello
+Translated: नमस्ते
+---
+[2025-07-23 16:37:58.817462]
+Input: how are you
+Translated: आप कैसे हैं
+---
+[2025-07-23 16:47:03]
+Input: hello hello
+Translated: नमस्ते नमस्ते
+---
+[2025-07-23 16:47:14]
+Input: how are you
+Translated: आप कैसे हैं
+---
+[2025-07-23 16:47:28]
+Input: do you want me to say anything
+Translated: क्या आप चाहते हैं कि मैं कुछ भी कहूं
+---
+[2025-07-23 16:47:36]
+Input: yes yes why
+Translated: हाँ हाँ क्यों
+---
+[2025-07-23 16:47:41]
+Input: ok ok
+Translated: ठीक है
+---
+[2025-07-23 16:48:34]
+Input: hello
+Translated: 鷹
+---
+[2025-07-23 16:48:49]
+Input: hello
+Translated: こんにちは
+---
+[2025-07-23 16:48:49]
+Input: hello
+Translated: こんにちは
+---
+[2025-07-23 16:48:59]
+Input: bye-bye
+Translated: バイバイ
+---
+[2025-07-23 16:51:13]
+Input: hello
+Translated: नमस्ते
+---
+[2025-07-23 16:51:21]
+Input: how are you
+Translated: आप कैसे हैं
+---
+[2025-07-23 16:51:32]
+Input: ok ok
+Translated: ठीक है
+---
+[2025-07-23 16:52:30]
+Input: hello
+Translated: नमस्ते
+---
+[2025-07-23 16:52:43]
+Input: why are
+Translated: क्यों हैं
+---
+[2025-07-23 16:54:38]
+Input: hello
+Translated: नमस्ते
+---
+[2025-07-23 16:54:43]
+Input: how are you
+Translated: आप कैसे हैं
+---
+[2025-07-23 16:57:02]
+Input: hello
+Translated: नमस्ते
+---
+[2025-07-23 16:57:26]
+Input: hello
+Translated: नमस्ते
+---
+[2025-07-23 19:43:56]
+Input: hello
+Translated: Ciao
+---
+[2025-07-23 19:44:04]
+Input: hello
+Translated: Ciao
+---
+[2025-07-23 19:44:21]
+Input: how are you
+Translated: Come stai
+---
+[2025-08-02 17:36:08]
+Input: hello how are you
+Translated: नमस्ते, आप कैसे हैं
+---
+[2025-08-23 22:22:32]
+Input: hello
+Translated: नमस्ते
+---
+[2025-08-23 22:22:44]
+Input: how
+Translated: कैसे
+---
+[2025-08-23 22:28:22]
+Input: hello
+Translated: नमस्ते
+---
+[2025-08-23 22:28:27]
+Input: how r u
+Translated: आप कैसे हैं
+---
+[2025-08-23 22:29:46]
+Input: hello
+Translated: नमस्ते
+---
+[2025-08-23 22:35:44]
+Input: hello
+Translated: नमस्ते
+---
+[2025-09-16 15:07:47]
+Input: hello
+Translated: नमस्ते
+---
+[2025-09-16 15:08:26]
+Input: I am
+Translated: मैं हूँ
+---
+[2025-09-16 15:08:43]
+Input: Kahan
+Translated: कहां
+---
+[2025-09-16 15:08:47]
+Input: hello I am
+Translated: हैलो मैं हूँ
+---
+[2025-10-16 09:18:39]
+Input: hello
+Translated: नमस्ते
+---
+[2025-10-16 09:19:04]
+Input: how
+Translated: कैसे
+---
+[2025-10-16 09:19:18]
+Input: how are you how are you
+Translated: आप कैसे हैं आप कैसे हैं
+---
+
+[2025-12-22 15:04:09]
+ORIGINAL (English): hello
+TRANSLATED (Hindi): नमस्ते
+------------------------------------------------------------
+
+[2025-12-22 15:04:13]
+ORIGINAL (English): how are you
+TRANSLATED (Hindi): आप कैसे हैं
+------------------------------------------------------------
+
+[2025-12-22 15:05:14]
+ORIGINAL (English): you were
+TRANSLATED (Hindi): तुम थे
+------------------------------------------------------------
+
+[2025-12-22 15:05:20]
+ORIGINAL (English): you were not there
+TRANSLATED (Hindi): आप वहां नहीं थे
+------------------------------------------------------------
+
+[2025-12-22 15:59:37]
+ORIGINAL: hello
+TRANSLATED: नमस्ते
+------------------------------------------------------------
+
+[2025-12-22 15:59:45]
+ORIGINAL: how are you
+TRANSLATED: आप कैसे हैं
+------------------------------------------------------------
+
+[2025-12-22 16:07:40]
+ORIGINAL: hello how are you
+TRANSLATED: नमस्ते, आप कैसे हैं
+------------------------------------------------------------
+
+[2025-12-22 16:07:47]
+ORIGINAL: so do you know me
+TRANSLATED: तो क्या आप मुझे जानते हैं?
+------------------------------------------------------------
+
+[2025-12-22 16:07:54]
+ORIGINAL: maybe I
+TRANSLATED: शायद मुझे
+------------------------------------------------------------
+
+[2025-12-22 16:08:03]
+ORIGINAL: maybe I do think that something you should
+TRANSLATED: शायद मुझे लगता है कि आपको कुछ ऐसा करना चाहिए
+------------------------------------------------------------
+
+[2025-12-22 16:08:28]
+ORIGINAL: are you Noob
+TRANSLATED: क्या आप नोब हैं?
+------------------------------------------------------------
+
+[2025-12-22 16:08:34]
+ORIGINAL: kya aap naam hai
+TRANSLATED: आपका नाम क्या है?
+------------------------------------------------------------
+
+[2025-12-22 16:17:13]
+ORIGINAL: hello
+TRANSLATED: नमस्ते
+------------------------------------------------------------
+
+[2025-12-22 16:17:18]
+ORIGINAL: can you hear me
+TRANSLATED: क्या आप मुझे सुन सकते हैं
+------------------------------------------------------------
+
+[2025-12-22 16:17:36]
+ORIGINAL: of course I
+TRANSLATED: बेशक मैं
+------------------------------------------------------------
+
+[2025-12-22 16:18:26]
+ORIGINAL: Jo Main bolungi
+TRANSLATED: जो मैं बोलूंगा
+------------------------------------------------------------
+
+[2025-12-22 16:18:42]
+ORIGINAL: you are very beautiful
+TRANSLATED: आप बहुत खूबसूरत हैं
+------------------------------------------------------------
+
+[2025-12-22 16:19:04]
+ORIGINAL: please sing a song
+TRANSLATED: कृपया एक गाना गाएं
+------------------------------------------------------------
+
+[2025-12-22 16:19:11]
+ORIGINAL: kripya ek gana
+TRANSLATED: कृपा एक गण
+------------------------------------------------------------
+
+[2025-12-22 16:33:49]
+ORIGINAL: hello
+TRANSLATED: नमस्ते
+------------------------------------------------------------
+
+[2025-12-22 16:33:56]
+ORIGINAL: how r u
+TRANSLATED: आप कैसे हैं
+------------------------------------------------------------
