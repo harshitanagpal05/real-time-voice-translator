@@ -1,0 +1,60 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: voxai-mongodb
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  python-api:
+    build:
+      context: ./backend/API
+      dockerfile: Dockerfile
+    container_name: voxai-python-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+
+  node-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: voxai-node-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      MONGO_URI: mongodb://mongodb:27017/voxai
+      JWT_SECRET: ${JWT_SECRET:-voxai_jwt_secret_change_in_production}
+      PYTHON_API_URL: http://python-api:8000
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      python-api:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./ai-translator-frontend
+      dockerfile: Dockerfile
+    container_name: voxai-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:5000
+      VITE_PROXY_TARGET: http://node-backend:5000
+    depends_on:
+      - node-backend
+
+volumes:
+  mongodb_data:
