@@ -7,6 +7,7 @@ const translationSchema = new mongoose.Schema(
     outputLanguage: { type: String, required: true },
     originalText: { type: String, required: true },
     translatedText: { type: String, required: true },
+    translationType: { type: String, enum: ['voice', 'text'], default: 'text' },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );

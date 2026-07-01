@@ -12,6 +12,12 @@ export const DEFAULT_SETTINGS = {
   aiVoiceEnabled: true,
   theme: 'dark',
   accentTheme: 'purple-orange',
+  appearance: 'dark',
+  fontSize: 'medium',
+  highContrast: false,
+  reducedMotion: false,
+  notificationsEnabled: false,
+  favoriteLanguages: [],
 };
 
 export function loadSettings() {

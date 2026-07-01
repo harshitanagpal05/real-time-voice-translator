@@ -5,18 +5,65 @@ import { loadSettings, saveSettings, DEFAULT_SETTINGS } from '../utils/settings'
 
 const SettingsContext = createContext(null);
 
+function resolveAppearance(appearance) {
+  if (appearance === 'system') {
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  }
+  return appearance;
+}
+
 export function SettingsProvider({ children }) {
   const [settings, setSettingsState] = useState(() => loadSettings());
 
+  // Apply theme, accent, appearance, accessibility to document
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', settings.theme);
-    document.documentElement.setAttribute('data-accent', settings.accentTheme);
-    if (settings.theme === 'light') {
-      document.documentElement.classList.add('theme-light');
-    } else {
-      document.documentElement.classList.remove('theme-light');
+    const doc = document.documentElement;
+    const resolved = resolveAppearance(settings.appearance || 'dark');
+
+    // Appearance (dark/light/amoled)
+    doc.setAttribute('data-theme', resolved);
+    doc.setAttribute('data-accent', settings.accentTheme);
+
+    doc.classList.remove('theme-light', 'theme-amoled');
+    if (resolved === 'light') {
+      doc.classList.add('theme-light');
+    } else if (resolved === 'amoled') {
+      doc.classList.add('theme-amoled');
     }
-  }, [settings.theme, settings.accentTheme]);
+
+    // Font size
+    const fontSizes = { small: '14px', medium: '16px', large: '18px' };
+    doc.style.fontSize = fontSizes[settings.fontSize] || '16px';
+
+    // Accessibility
+    if (settings.highContrast) {
+      doc.classList.add('high-contrast');
+    } else {
+      doc.classList.remove('high-contrast');
+    }
+
+    if (settings.reducedMotion) {
+      doc.classList.add('reduced-motion');
+    } else {
+      doc.classList.remove('reduced-motion');
+    }
+  }, [settings.appearance, settings.accentTheme, settings.fontSize, settings.highContrast, settings.reducedMotion]);
+
+  // Listen for system theme changes when appearance === 'system'
+  useEffect(() => {
+    if (settings.appearance !== 'system') return undefined;
+
+    const mq = window.matchMedia('(prefers-color-scheme: light)');
+    const handler = () => {
+      const doc = document.documentElement;
+      const resolved = mq.matches ? 'light' : 'dark';
+      doc.setAttribute('data-theme', resolved);
+      doc.classList.remove('theme-light', 'theme-amoled');
+      if (resolved === 'light') doc.classList.add('theme-light');
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [settings.appearance]);
 
   const syncUserProfile = useCallback(async (user) => {
     if (!user) return;

@@ -287,3 +287,48 @@
     gap: 10px;
   }
 }
+
+/* ═══════════════════ MODE SELECTOR ═══════════════════ */
+
+.dash-mode-selector-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.dash-mode-selector {
+  display: flex;
+  padding: 4px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  gap: 4px;
+}
+
+.dash-mode-btn {
+  padding: 8px 20px;
+  border-radius: 50px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-mode-btn:hover {
+  color: var(--text-primary);
+}
+
+.dash-mode-btn.active {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-orange));
+  color: #fff;
+  box-shadow: 0 4px 15px color-mix(in srgb, var(--accent-purple) 20%, transparent);
+}
+

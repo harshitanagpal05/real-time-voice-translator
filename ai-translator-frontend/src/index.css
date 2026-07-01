@@ -91,7 +91,7 @@ select {
   background: rgba(255, 255, 255, 0.14);
 }
 
-/* Light theme */
+/* ═══════════════════ LIGHT THEME ═══════════════════ */
 html.theme-light {
   color-scheme: light;
   --bg-primary: #f4f4f8;
@@ -106,15 +106,90 @@ html.theme-light ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.12);
 }
 
-/* Accent theme variants */
+/* ═══════════════════ AMOLED THEME ═══════════════════ */
+html.theme-amoled {
+  color-scheme: dark;
+  --bg-primary: #000000;
+  --bg-secondary: #000000;
+  --bg-card: rgba(255, 255, 255, 0.02);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+}
+
+/* ═══════════════════ ACCENT THEMES ═══════════════════ */
+
+/* Default: Purple & Orange */
+html[data-accent='purple-orange'] {
+  --accent-purple: #6A0DAD;
+  --accent-magenta: #E040FB;
+  --accent-orange: #FF8C00;
+}
+
+/* Blue & Cyan */
 html[data-accent='blue-cyan'] {
   --accent-purple: #2563eb;
   --accent-magenta: #06b6d4;
   --accent-orange: #0891b2;
 }
 
+/* Magenta & Gold */
 html[data-accent='magenta-gold'] {
   --accent-purple: #c026d3;
   --accent-magenta: #e879f9;
   --accent-orange: #f59e0b;
+}
+
+/* Green & Teal */
+html[data-accent='green-teal'] {
+  --accent-purple: #059669;
+  --accent-magenta: #34d399;
+  --accent-orange: #14b8a6;
+}
+
+/* Red & Rose */
+html[data-accent='red-rose'] {
+  --accent-purple: #dc2626;
+  --accent-magenta: #fb7185;
+  --accent-orange: #f43f5e;
+}
+
+/* Indigo & Violet */
+html[data-accent='indigo-violet'] {
+  --accent-purple: #4f46e5;
+  --accent-magenta: #8b5cf6;
+  --accent-orange: #a78bfa;
+}
+
+/* Sunset (Warm) */
+html[data-accent='sunset'] {
+  --accent-purple: #ea580c;
+  --accent-magenta: #f97316;
+  --accent-orange: #fbbf24;
+}
+
+/* Ocean */
+html[data-accent='ocean'] {
+  --accent-purple: #0369a1;
+  --accent-magenta: #0ea5e9;
+  --accent-orange: #38bdf8;
+}
+
+/* ═══════════════════ ACCESSIBILITY ═══════════════════ */
+html.high-contrast {
+  --text-secondary: #d4d4d4;
+  --glass-border: rgba(255, 255, 255, 0.2);
+}
+
+html.high-contrast.theme-light {
+  --text-secondary: #222222;
+  --glass-border: rgba(0, 0, 0, 0.25);
+}
+
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }

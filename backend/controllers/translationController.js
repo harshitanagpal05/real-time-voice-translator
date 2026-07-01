@@ -2,7 +2,7 @@ import Translation from '../models/Translation.js';
 
 export async function saveTranslation(req, res) {
   try {
-    const { inputLanguage, outputLanguage, originalText, translatedText } = req.body;
+    const { inputLanguage, outputLanguage, originalText, translatedText, translationType } = req.body;
 
     if (!inputLanguage || !outputLanguage || !originalText?.trim() || !translatedText?.trim()) {
       return res.status(400).json({ error: 'All translation fields are required' });
@@ -14,6 +14,7 @@ export async function saveTranslation(req, res) {
       outputLanguage,
       originalText: originalText.trim(),
       translatedText: translatedText.trim(),
+      translationType: translationType === 'voice' ? 'voice' : 'text',
     });
 
     return res.status(201).json({ translation: entry });
@@ -65,6 +66,151 @@ export async function clearHistory(req, res) {
   }
 }
 
+export async function getAnalytics(req, res) {
+  try {
+    const userId = req.user._id;
+
+    // Total count
+    const totalTranslations = await Translation.countDocuments({ userId });
+
+    if (totalTranslations === 0) {
+      return res.json({
+        totalTranslations: 0,
+        voiceCount: 0,
+        textCount: 0,
+        topSourceLang: null,
+        topTargetLang: null,
+        topLangPair: null,
+        dailyCounts: [],
+        weeklyCounts: [],
+        monthlyCounts: [],
+        recentActivity: [],
+      });
+    }
+
+    // Voice vs Text
+    const typeCounts = await Translation.aggregate([
+      { $match: { userId } },
+      { $group: { _id: '$translationType', count: { $sum: 1 } } },
+    ]);
+    const voiceCount = typeCounts.find((t) => t._id === 'voice')?.count || 0;
+    const textCount = typeCounts.find((t) => t._id === 'text')?.count || (totalTranslations - voiceCount);
+
+    // Most used source language
+    const topSourceAgg = await Translation.aggregate([
+      { $match: { userId } },
+      { $group: { _id: '$inputLanguage', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 1 },
+    ]);
+    const topSourceLang = topSourceAgg[0]?._id || null;
+
+    // Most used target language
+    const topTargetAgg = await Translation.aggregate([
+      { $match: { userId } },
+      { $group: { _id: '$outputLanguage', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 1 },
+    ]);
+    const topTargetLang = topTargetAgg[0]?._id || null;
+
+    // Most translated language pair
+    const topPairAgg = await Translation.aggregate([
+      { $match: { userId } },
+      {
+        $group: {
+          _id: { source: '$inputLanguage', target: '$outputLanguage' },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+    ]);
+    const topLangPair = topPairAgg[0]
+      ? { source: topPairAgg[0]._id.source, target: topPairAgg[0]._id.target, count: topPairAgg[0].count }
+      : null;
+
+    // Daily counts (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const dailyCounts = await Translation.aggregate([
+      { $match: { userId, createdAt: { $gte: sevenDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Weekly counts (last 4 weeks)
+    const fourWeeksAgo = new Date();
+    fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 27);
+    fourWeeksAgo.setHours(0, 0, 0, 0);
+
+    const weeklyCounts = await Translation.aggregate([
+      { $match: { userId, createdAt: { $gte: fourWeeksAgo } } },
+      {
+        $group: {
+          _id: { $isoWeek: '$createdAt' },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Monthly counts (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const monthlyCounts = await Translation.aggregate([
+      { $match: { userId, createdAt: { $gte: sixMonthsAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Recent activity (last 20)
+    const recentActivity = await Translation.find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .select('inputLanguage outputLanguage originalText translatedText translationType createdAt');
+
+    // Top pairs for charts
+    const langPairs = topPairAgg.map((p) => ({
+      source: p._id.source,
+      target: p._id.target,
+      count: p.count,
+    }));
+
+    return res.json({
+      totalTranslations,
+      voiceCount,
+      textCount,
+      topSourceLang,
+      topTargetLang,
+      topLangPair,
+      langPairs,
+      dailyCounts: dailyCounts.map((d) => ({ date: d._id, count: d.count })),
+      weeklyCounts: weeklyCounts.map((w) => ({ week: w._id, count: w.count })),
+      monthlyCounts: monthlyCounts.map((m) => ({ month: m._id, count: m.count })),
+      recentActivity,
+    });
+  } catch (err) {
+    console.error('Analytics error:', err);
+    return res.status(500).json({ error: 'Failed to load analytics' });
+  }
+}
+
 export async function translateText(req, res) {
   try {
     const { text, source_lang, target_lang } = req.body;
@@ -91,7 +237,8 @@ export async function translateText(req, res) {
       return res.json({ translated_text: translated });
     }
 
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${source_lang}|${target_lang}`;
+    const myMemorySrc = source_lang === 'auto' ? 'Autodetect' : source_lang;
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${myMemorySrc}|${target_lang}`;
     const response = await fetch(url);
     if (!response.ok) {
       return res.status(502).json({ error: 'Translation service unavailable' });

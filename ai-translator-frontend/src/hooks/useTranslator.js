@@ -67,6 +67,14 @@ export default function useTranslator() {
     if (!loadSettings().saveHistory || !getToken()) return;
 
     try {
+      const recents = JSON.parse(localStorage.getItem('voxai_recent_langs') || '[]');
+      const nextRecents = Array.from(new Set([entry.source, entry.target, ...recents])).slice(0, 10);
+      localStorage.setItem('voxai_recent_langs', JSON.stringify(nextRecents));
+    } catch (e) {
+      // ignore
+    }
+
+    try {
       const saved = await saveTranslationHistory(entry);
       setHistory((prev) => [saved, ...prev].slice(0, MAX_HISTORY));
     } catch {
@@ -124,6 +132,7 @@ export default function useTranslator() {
         translated: result,
         source: sourceLangRef.current,
         target: targetLangRef.current,
+        translationType: 'voice',
         time: new Date().toLocaleString(),
         id: Date.now(),
       });
@@ -279,6 +288,43 @@ export default function useTranslator() {
     window.speechSynthesis.cancel();
   }, []);
 
+  const translateManualText = useCallback(async (text) => {
+    if (!text || !text.trim()) return;
+
+    setIsTranslating(true);
+    setError('');
+
+    try {
+      const result = await translateText(
+        text,
+        sourceLangRef.current,
+        targetLangRef.current,
+      );
+
+      if (!result || result.includes('Translation failed')) {
+        throw new Error(result || 'Translation failed');
+      }
+
+      setTranslatedText(result);
+      saveHistory({
+        original: text,
+        translated: result,
+        source: sourceLangRef.current,
+        target: targetLangRef.current,
+        translationType: 'text',
+        time: new Date().toLocaleString(),
+        id: Date.now(),
+      });
+
+      speakText(result, targetLangRef.current);
+    } catch (err) {
+      setTranslatedText('');
+      setError(err.message || 'Translation request failed');
+    } finally {
+      setIsTranslating(false);
+    }
+  }, [saveHistory, speakText]);
+
   const swapLanguages = useCallback(() => {
     setSourceLang((s) => {
       setTargetLang(s);
@@ -310,6 +356,8 @@ export default function useTranslator() {
     history,
     setSourceLang,
     setTargetLang,
+    setOriginalText,
+    setTranslatedText,
     setVoiceEnabled,
     startListening,
     stopListening,
@@ -317,5 +365,6 @@ export default function useTranslator() {
     clearHistory,
     speakTranslation,
     clearError,
+    translateManualText,
   };
 }

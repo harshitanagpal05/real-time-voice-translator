@@ -1,8 +1,4 @@
-/**
- * DashboardPage — Main translator workspace (center + history panel).
- */
-
-import { useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -30,6 +26,7 @@ export default function DashboardPage() {
   const translateRef = useRef(null);
   const historyRef = useRef(null);
   const languagesRef = useRef(null);
+  const [mode, setMode] = useState('voice'); // 'voice' | 'text'
 
   const {
     sourceLang, targetLang,
@@ -38,7 +35,8 @@ export default function DashboardPage() {
     voiceEnabled, error, history,
     setSourceLang, setTargetLang, setVoiceEnabled,
     startListening, stopListening, swapLanguages, clearHistory,
-    speakTranslation, clearError,
+    speakTranslation, clearError, translateManualText,
+    setOriginalText, setTranslatedText,
   } = useTranslator();
 
   useEffect(() => {
@@ -97,6 +95,26 @@ export default function DashboardPage() {
           </div>
         </header>
 
+        {/* Translation Mode Selector */}
+        <div className="dash-mode-selector-wrapper">
+          <div className="dash-mode-selector">
+            <button
+              type="button"
+              className={`dash-mode-btn ${mode === 'voice' ? 'active' : ''}`}
+              onClick={() => { setMode('voice'); stopListening(); }}
+            >
+              🎙 Voice Translation
+            </button>
+            <button
+              type="button"
+              className={`dash-mode-btn ${mode === 'text' ? 'active' : ''}`}
+              onClick={() => { setMode('text'); stopListening(); }}
+            >
+              ⌨ Text Translation
+            </button>
+          </div>
+        </div>
+
         <AnimatePresence>
           {error && (
             <motion.div className="dash-error" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
@@ -106,50 +124,64 @@ export default function DashboardPage() {
           )}
         </AnimatePresence>
 
-        <section className="dash-orb-area" ref={translateRef}>
-          <AudioVisualizer isListening={isListening} isSpeaking={isSpeaking} isTranslating={isTranslating} />
-          <VoiceOrb isListening={isListening} isSpeaking={isSpeaking} isTranslating={isTranslating} showStatus={false} />
-          <div className={`dash-listening-label ${statusError ? 'error' : ''} ${statusActive ? 'active' : ''}`}>
-            <span className={`dash-live-dot ${statusActive ? 'on' : ''} ${statusError ? 'error' : ''}`} />
-            {statusLabel}
-          </div>
-        </section>
+        <AnimatePresence mode="wait">
+          {mode === 'voice' && (
+            <motion.div
+              key="voice-controls"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              style={{ overflow: 'hidden' }}
+            >
+              <section className="dash-orb-area" ref={translateRef}>
+                <AudioVisualizer isListening={isListening} isSpeaking={isSpeaking} isTranslating={isTranslating} />
+                <VoiceOrb isListening={isListening} isSpeaking={isSpeaking} isTranslating={isTranslating} showStatus={false} />
+                <div className={`dash-listening-label ${statusError ? 'error' : ''} ${statusActive ? 'active' : ''}`}>
+                  <span className={`dash-live-dot ${statusActive ? 'on' : ''} ${statusError ? 'error' : ''}`} />
+                  {statusLabel}
+                </div>
+              </section>
 
-        <div className="dash-controls-row">
-          {!isListening ? (
-            <motion.button
-              type="button"
-              className="dash-control-btn start"
-              onClick={startListening}
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              id="start-btn"
-            >
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                <path d="M12 14c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v5c0 1.66 1.34 3 3 3z" />
-                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
-              </svg>
-              Start Translation
-            </motion.button>
-          ) : (
-            <motion.button
-              type="button"
-              className="dash-control-btn stop"
-              onClick={stopListening}
-              whileHover={{ scale: 1.03, y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              id="stop-btn"
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                <rect x="6" y="6" width="12" height="12" rx="2" />
-              </svg>
-              Stop Translation
-            </motion.button>
+              <div className="dash-controls-row">
+                {!isListening ? (
+                  <motion.button
+                    type="button"
+                    className="dash-control-btn start"
+                    onClick={startListening}
+                    whileHover={{ scale: 1.03, y: -2 }}
+                    whileTap={{ scale: 0.97 }}
+                    id="start-btn"
+                  >
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                      <path d="M12 14c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v5c0 1.66 1.34 3 3 3z" />
+                      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                    </svg>
+                    Start Translation
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    type="button"
+                    className="dash-control-btn stop"
+                    onClick={stopListening}
+                    whileHover={{ scale: 1.03, y: -2 }}
+                    whileTap={{ scale: 0.97 }}
+                    id="stop-btn"
+                  >
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                      <rect x="6" y="6" width="12" height="12" rx="2" />
+                    </svg>
+                    Stop Translation
+                  </motion.button>
+                )}
+              </div>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
 
         <section className="dash-cards-area" id="languages" ref={languagesRef}>
           <TranslatorPanel
+            mode={mode}
             originalText={originalText}
             translatedText={translatedText}
             sourceLang={sourceLang}
@@ -161,6 +193,9 @@ export default function DashboardPage() {
             onTargetChange={setTargetLang}
             onSwap={swapLanguages}
             onSpeak={speakTranslation}
+            onOriginalTextChange={setOriginalText}
+            onTranslate={() => translateManualText(originalText)}
+            onClear={() => { setOriginalText(''); setTranslatedText(''); }}
           />
         </section>
 

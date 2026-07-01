@@ -11,9 +11,11 @@ function mapToFrontend(entry) {
     translated: entry.translatedText,
     source: entry.inputLanguage,
     target: entry.outputLanguage,
+    translationType: entry.translationType || 'text',
     time: entry.createdAt
       ? new Date(entry.createdAt).toLocaleString()
       : new Date().toLocaleString(),
+    rawTime: entry.createdAt || new Date().toISOString(),
   };
 }
 
@@ -28,6 +30,7 @@ export async function saveTranslationHistory(entry) {
     outputLanguage: entry.target,
     originalText: entry.original,
     translatedText: entry.translated,
+    translationType: entry.translationType || 'text',
   });
   return mapToFrontend(data.translation);
 }
@@ -38,4 +41,9 @@ export async function deleteTranslationHistory(id) {
 
 export async function clearTranslationHistory() {
   await api.delete('/translations');
+}
+
+export async function fetchAnalytics() {
+  const { data } = await api.get('/translations/analytics');
+  return data;
 }

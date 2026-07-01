@@ -10,6 +10,9 @@ import './DashboardLayout.css';
 
 const ROUTE_NAV = {
   '/dashboard': 'translate',
+  '/history': 'history',
+  '/languages': 'languages',
+  '/analytics': 'analytics',
   '/settings': 'settings',
   '/how-it-works': 'how-it-works',
   '/about-founder': 'about-founder',
@@ -33,19 +36,15 @@ export default function DashboardLayout() {
     const routes = {
       dashboard: '/dashboard',
       translate: '/dashboard',
-      history: '/dashboard#history',
-      languages: '/dashboard#languages',
+      history: '/history',
+      languages: '/languages',
+      analytics: '/analytics',
       settings: '/settings',
       'how-it-works': '/how-it-works',
       'about-founder': '/about-founder',
     };
     const target = routes[id];
-    if (target?.includes('#')) {
-      navigate('/dashboard');
-      setTimeout(() => {
-        document.getElementById(target.split('#')[1])?.scrollIntoView({ behavior: 'smooth' });
-      }, 300);
-    } else if (target) {
+    if (target) {
       navigate(target);
     }
   };

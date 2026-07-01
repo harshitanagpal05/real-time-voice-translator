@@ -13,6 +13,9 @@ import AboutFounderPage from './pages/AboutFounderPage';
 import AdminPage from './pages/AdminPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 
+import HistoryPage from './pages/HistoryPage';
+import LanguagesPage from './pages/LanguagesPage';
+
 function GuestRoute({ children }) {
   const { isAuthenticated } = useAuth();
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
@@ -57,13 +60,15 @@ function AppRoutes() {
 
         <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/languages" element={<LanguagesPage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/about-founder" element={<AboutFounderPage />} />
         </Route>
 
         <Route path="/admin" element={<ProtectedRoute><AnimatedPage><AdminPage /></AnimatedPage></ProtectedRoute>} />
-        <Route path="/analytics" element={<ProtectedRoute><AnimatedPage><AnalyticsPage /></AnimatedPage></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>
