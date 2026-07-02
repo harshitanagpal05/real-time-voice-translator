@@ -1,30 +1,44 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import DashboardPage from './pages/DashboardPage';
-import SettingsPage from './pages/SettingsPage';
-import HowItWorksPage from './pages/HowItWorksPage';
-import AboutFounderPage from './pages/AboutFounderPage';
-import AdminPage from './pages/AdminPage';
-import AnalyticsPage from './pages/AnalyticsPage';
+import AdminLayout from './components/AdminLayout/AdminLayout';
 
-import HistoryPage from './pages/HistoryPage';
-import LanguagesPage from './pages/LanguagesPage';
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage'));
+const AboutFounderPage = lazy(() => import('./pages/AboutFounderPage'));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
+const HistoryPage = lazy(() => import('./pages/HistoryPage'));
+const LanguagesPage = lazy(() => import('./pages/LanguagesPage'));
+
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'));
+const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'));
+const AdminAnalyticsPage = lazy(() => import('./pages/admin/AdminAnalyticsPage'));
+const AdminActivityPage = lazy(() => import('./pages/admin/AdminActivityPage'));
+const AdminSystemPage = lazy(() => import('./pages/admin/AdminSystemPage'));
+const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettingsPage'));
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 function GuestRoute({ children }) {
-  const { isAuthenticated } = useAuth();
-  if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+  const { isAuthenticated, user } = useAuth();
+  if (isAuthenticated) {
+    return <Navigate to={user?.isAdmin ? '/admin' : '/dashboard'} replace />;
+  }
   return children;
 }
 
 function RootRedirect() {
-  const { isAuthenticated } = useAuth();
-  return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />;
+  const { isAuthenticated, user } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <Navigate to={user?.isAdmin ? '/admin' : '/dashboard'} replace />;
 }
 
 const pageVariants = {
@@ -52,37 +66,59 @@ function AppRoutes() {
   const location = useLocation();
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<RootRedirect />} />
-        <Route path="/login" element={<GuestRoute><AnimatedPage><LoginPage /></AnimatedPage></GuestRoute>} />
-        <Route path="/signup" element={<GuestRoute><AnimatedPage><SignupPage /></AnimatedPage></GuestRoute>} />
+    <Suspense
+      fallback={(
+        <AnimatedPage>
+          <div style={{ display: 'grid', minHeight: '60vh', placeItems: 'center', color: 'var(--text-secondary)' }}>
+            Loading workspace...
+          </div>
+        </AnimatedPage>
+      )}
+    >
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<RootRedirect />} />
+          <Route path="/login" element={<GuestRoute><AnimatedPage><LoginPage /></AnimatedPage></GuestRoute>} />
+          <Route path="/signup" element={<GuestRoute><AnimatedPage><SignupPage /></AnimatedPage></GuestRoute>} />
 
-        <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/languages" element={<LanguagesPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/how-it-works" element={<HowItWorksPage />} />
-          <Route path="/about-founder" element={<AboutFounderPage />} />
-        </Route>
+          {/* User Dashboard Routes */}
+          <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/languages" element={<LanguagesPage />} />
+            <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/about-founder" element={<AboutFounderPage />} />
+          </Route>
 
-        <Route path="/admin" element={<ProtectedRoute><AnimatedPage><AdminPage /></AnimatedPage></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AnimatePresence>
+          {/* Admin Dashboard Routes */}
+          <Route element={<ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute>}>
+            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+            <Route path="/admin/activity" element={<AdminActivityPage />} />
+            <Route path="/admin/system" element={<AdminSystemPage />} />
+            <Route path="/admin/settings" element={<AdminSettingsPage />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AnimatePresence>
+    </Suspense>
   );
 }
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <SettingsProvider>
-          <AppRoutes />
-        </SettingsProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <BrowserRouter>
+        <AuthProvider>
+          <SettingsProvider>
+            <AppRoutes />
+          </SettingsProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   );
 }

@@ -1,4 +1,7 @@
-from fastapi import FastAPI
+import os
+import secrets
+
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 from googletrans import Translator
@@ -6,6 +9,9 @@ from googletrans import Translator
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker, declarative_base
 from passlib.context import CryptContext
+
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests as google_requests
 
 # -----------------------------
 # APP INITIALIZATION
@@ -83,6 +89,14 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+class GoogleAuthRequest(BaseModel):
+    credential: str
+
+GOOGLE_CLIENT_ID = os.environ.get(
+    "GOOGLE_CLIENT_ID",
+    "1024232829760-pgfhsbglmouhthhlf3lg015j36724o0c.apps.googleusercontent.com",
+)
+
 # -----------------------------
 # HEALTH CHECK
 # -----------------------------
@@ -147,8 +161,49 @@ def login(data: LoginRequest):
     return {
         "message": "Login successful",
         "email": user.email,
+        "name": user.name,
         "role": user.role
     }
+
+# -----------------------------
+# AUTH: GOOGLE SIGN-IN
+# -----------------------------
+@app.post("/auth/google")
+def google_auth(data: GoogleAuthRequest):
+    try:
+        idinfo = google_id_token.verify_oauth2_token(
+            data.credential,
+            google_requests.Request(),
+            GOOGLE_CLIENT_ID,
+        )
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    email = idinfo.get("email")
+    name = idinfo.get("name", email.split("@")[0] if email else "")
+
+    if not email:
+        raise HTTPException(status_code=400, detail="Google account has no email")
+
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == email).first()
+
+    if not user:
+        # Auto-register Google user with a random placeholder password
+        placeholder_pw = hash_password(secrets.token_urlsafe(32))
+        user = User(name=name, email=email, password=placeholder_pw, role="user")
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+
+    result = {
+        "message": "Login successful",
+        "email": user.email,
+        "name": user.name,
+        "role": user.role,
+    }
+    db.close()
+    return result
 
 # -----------------------------
 # ADMIN: VIEW REGISTERED USERS

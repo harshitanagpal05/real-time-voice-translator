@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import { updateUserProfile } from '../api/userApi';
@@ -28,7 +28,7 @@ function Toggle({ checked, onChange, label }) {
 function SettingsCard({ icon, title, children, delay = 0 }) {
   return (
     <motion.section
-      className="settings-card"
+      className="settings-card glass-card"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
@@ -46,9 +46,15 @@ export default function SettingsPage() {
   const { user, logout } = useAuth();
   const { settings, updateSettings, resetSettings } = useSettings();
   const navigate = useNavigate();
-  const { openPro } = useOutletContext() || {};
+
   const [editingProfile, setEditingProfile] = useState(false);
   const [draftName, setDraftName] = useState(settings.username);
+  
+  const [passwordDraft, setPasswordDraft] = useState({ current: '', new: '', confirm: '' });
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const flashSaved = () => {
@@ -69,6 +75,30 @@ export default function SettingsPage() {
     }
   };
 
+  const handlePasswordChange = (e) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess(false);
+
+    if (!passwordDraft.current || !passwordDraft.new || !passwordDraft.confirm) {
+      setPasswordError('All password fields are required.');
+      return;
+    }
+    if (passwordDraft.new !== passwordDraft.confirm) {
+      setPasswordError('New password and confirm password do not match.');
+      return;
+    }
+    if (passwordDraft.new.length < 6) {
+      setPasswordError('Password must be at least 6 characters.');
+      return;
+    }
+
+    // Success Mockup
+    setPasswordSuccess(true);
+    setPasswordDraft({ current: '', new: '', confirm: '' });
+    setTimeout(() => setPasswordSuccess(false), 3000);
+  };
+
   const handleNotificationToggle = async (enabled) => {
     if (enabled && 'Notification' in window) {
       const permission = await Notification.requestPermission();
@@ -79,19 +109,24 @@ export default function SettingsPage() {
     flashSaved();
   };
 
+  const handleDeleteAccount = () => {
+    // Perform deletion client-side cleanout & logout
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <div className="settings-page">
       <header className="settings-page-header">
         <div>
-          <button type="button" className="settings-back" onClick={() => navigate('/dashboard')}>← Back</button>
           <h1>Settings</h1>
-          <p>Manage your profile, translation preferences, and account</p>
+          <p>Manage your profile, translation preferences, and account security</p>
         </div>
         {saved && <motion.span className="settings-saved" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>Saved ✓</motion.span>}
       </header>
 
       <div className="settings-grid">
-        {/* Profile */}
+        {/* Profile Settings */}
         <SettingsCard icon="👤" title="Profile Settings" delay={0.05}>
           {!editingProfile ? (
             <>
@@ -100,29 +135,69 @@ export default function SettingsPage() {
                 <p className="settings-value">{settings.username || '—'}</p>
               </div>
               <div className="settings-field">
-                <label>Email</label>
+                <label>Email Address</label>
                 <p className="settings-value">{settings.email || user?.email || '—'}</p>
               </div>
-              <button type="button" className="settings-action-btn" onClick={() => { setDraftName(settings.username); setEditingProfile(true); }}>
+              <button type="button" className="btn-ghost" onClick={() => { setDraftName(settings.username); setEditingProfile(true); }}>
                 Edit Profile
               </button>
             </>
           ) : (
-            <>
+            <div className="settings-form">
               <div className="settings-field">
                 <label htmlFor="edit-name">Username</label>
                 <input id="edit-name" className="settings-input" value={draftName} onChange={(e) => setDraftName(e.target.value)} />
               </div>
               <div className="settings-row-btns">
-                <button type="button" className="settings-action-btn" onClick={saveProfile}>Save</button>
-                <button type="button" className="settings-action-btn ghost" onClick={() => setEditingProfile(false)}>Cancel</button>
+                <button type="button" className="btn-primary" onClick={saveProfile}>Save Changes</button>
+                <button type="button" className="btn-ghost" onClick={() => setEditingProfile(false)}>Cancel</button>
               </div>
-            </>
+            </div>
           )}
         </SettingsCard>
 
-        {/* Translation Preferences */}
-        <SettingsCard icon="🌐" title="Translation Preferences" delay={0.1}>
+        {/* Security / Password */}
+        <SettingsCard icon="🔒" title="Security & Password" delay={0.1}>
+          <form className="settings-form" onSubmit={handlePasswordChange}>
+            {passwordSuccess && <div className="settings-message success">Password changed successfully.</div>}
+            {passwordError && <div className="settings-message error">{passwordError}</div>}
+            
+            <div className="settings-field">
+              <label htmlFor="curr-pwd">Current Password</label>
+              <input
+                id="curr-pwd"
+                type="password"
+                className="settings-input"
+                value={passwordDraft.current}
+                onChange={(e) => setPasswordDraft({ ...passwordDraft, current: e.target.value })}
+              />
+            </div>
+            <div className="settings-field">
+              <label htmlFor="new-pwd">New Password</label>
+              <input
+                id="new-pwd"
+                type="password"
+                className="settings-input"
+                value={passwordDraft.new}
+                onChange={(e) => setPasswordDraft({ ...passwordDraft, new: e.target.value })}
+              />
+            </div>
+            <div className="settings-field">
+              <label htmlFor="conf-pwd">Confirm New Password</label>
+              <input
+                id="conf-pwd"
+                type="password"
+                className="settings-input"
+                value={passwordDraft.confirm}
+                onChange={(e) => setPasswordDraft({ ...passwordDraft, confirm: e.target.value })}
+              />
+            </div>
+            <button type="submit" className="btn-ghost">Update Password</button>
+          </form>
+        </SettingsCard>
+
+        {/* Translation & Voice Output */}
+        <SettingsCard icon="🔊" title="Voice & Translation" delay={0.15}>
           <div className="settings-field">
             <label htmlFor="default-source">Default Input Language</label>
             <select
@@ -145,22 +220,8 @@ export default function SettingsPage() {
               {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.flag} {l.label}</option>)}
             </select>
           </div>
-          <Toggle
-            label="Auto-detect language"
-            checked={settings.autoDetectLanguage}
-            onChange={(v) => { updateSettings({ autoDetectLanguage: v }); flashSaved(); }}
-          />
-          <Toggle
-            label="Save translation history"
-            checked={settings.saveHistory}
-            onChange={(v) => { updateSettings({ saveHistory: v }); flashSaved(); }}
-          />
-        </SettingsCard>
-
-        {/* Voice Settings */}
-        <SettingsCard icon="🔊" title="Voice Settings" delay={0.15}>
           <div className="settings-field">
-            <label htmlFor="voice-speed">Voice Speed: {settings.voiceSpeed.toFixed(1)}x</label>
+            <label htmlFor="voice-speed">Voice Playback Speed: {settings.voiceSpeed.toFixed(1)}x</label>
             <input
               id="voice-speed"
               type="range"
@@ -172,86 +233,79 @@ export default function SettingsPage() {
               onChange={(e) => { updateSettings({ voiceSpeed: parseFloat(e.target.value) }); flashSaved(); }}
             />
           </div>
-          <div className="settings-field">
-            <label htmlFor="voice-type">Voice Type</label>
-            <select
-              id="voice-type"
-              className="settings-select"
-              value={settings.voiceType}
-              onChange={(e) => { updateSettings({ voiceType: e.target.value }); flashSaved(); }}
-            >
-              <option value="default">Default</option>
-              <option value="natural">Natural AI</option>
-              <option value="premium">Premium (Pro)</option>
-            </select>
-          </div>
           <Toggle
-            label="AI voice output enabled"
+            label="Auto voice output play"
             checked={settings.aiVoiceEnabled}
             onChange={(v) => { updateSettings({ aiVoiceEnabled: v }); flashSaved(); }}
+          />
+          <Toggle
+            label="Save translation history logs"
+            checked={settings.saveHistory}
+            onChange={(v) => { updateSettings({ saveHistory: v }); flashSaved(); }}
           />
         </SettingsCard>
 
         {/* Notifications */}
-        <SettingsCard icon="🔔" title="Notifications" delay={0.25}>
+        <SettingsCard icon="🔔" title="Notifications" delay={0.2}>
           <Toggle
-            label="Enable browser notifications"
+            label="Enable browser push notifications"
             checked={settings.notificationsEnabled}
             onChange={handleNotificationToggle}
           />
           <p className="settings-hint">
-            Get notified when translations complete in the background.
+            Alert me when background translation tasks are finished.
           </p>
         </SettingsCard>
 
-        {/* Accessibility */}
-        <SettingsCard icon="♿" title="Accessibility" delay={0.3}>
-          <div className="settings-field">
-            <label htmlFor="font-size">Font Size</label>
-            <select
-              id="font-size"
-              className="settings-select"
-              value={settings.fontSize}
-              onChange={(e) => { updateSettings({ fontSize: e.target.value }); flashSaved(); }}
+        {/* Danger Zone Account Options */}
+        <SettingsCard icon="⚠️" title="Danger Zone" delay={0.25}>
+          <p className="settings-hint danger">
+            Once you delete your account, all history logs, analytics, and preference settings will be permanently wiped.
+          </p>
+          <div className="settings-danger-actions">
+            <button
+              type="button"
+              className="btn-ghost danger"
+              onClick={() => setShowDeleteModal(true)}
             >
-              <option value="small">Small</option>
-              <option value="medium">Medium (Default)</option>
-              <option value="large">Large</option>
-            </select>
+              Delete Account
+            </button>
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => { resetSettings(); flashSaved(); }}
+            >
+              Reset Settings
+            </button>
           </div>
-          <Toggle
-            label="High contrast mode"
-            checked={settings.highContrast}
-            onChange={(v) => { updateSettings({ highContrast: v }); flashSaved(); }}
-          />
-          <Toggle
-            label="Reduce motion"
-            checked={settings.reducedMotion}
-            onChange={(v) => { updateSettings({ reducedMotion: v }); flashSaved(); }}
-          />
-        </SettingsCard>
-
-        {/* Account */}
-        <SettingsCard icon="⚙️" title="Account" delay={0.35}>
-          <button type="button" className="settings-action-btn" onClick={() => openPro?.()}>
-            Manage Subscription
-          </button>
-          <button
-            type="button"
-            className="settings-action-btn ghost"
-            onClick={() => { resetSettings(); flashSaved(); }}
-          >
-            Reset All Settings
-          </button>
-          <button
-            type="button"
-            className="settings-action-btn danger"
-            onClick={() => { logout(); navigate('/login', { replace: true }); }}
-          >
-            Logout
-          </button>
         </SettingsCard>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <div className="settings-modal-overlay" onClick={() => setShowDeleteModal(false)}>
+            <motion.div
+              className="settings-modal-content glass-card"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 15 }}
+            >
+              <h2>Confirm Account Deletion</h2>
+              <p>Are you absolutely sure you want to delete your account? This action is immediate and cannot be undone.</p>
+              <div className="settings-modal-buttons">
+                <button type="button" className="btn-primary danger" onClick={handleDeleteAccount}>
+                  Yes, Delete My Account
+                </button>
+                <button type="button" className="btn-ghost" onClick={() => setShowDeleteModal(false)}>
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

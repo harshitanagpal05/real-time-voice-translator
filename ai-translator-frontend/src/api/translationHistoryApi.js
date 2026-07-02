@@ -40,6 +40,7 @@ function mapToFrontend(entry) {
       ? new Date(entry.createdAt).toLocaleString()
       : entry.time || new Date(rawTime).toLocaleString(),
     rawTime,
+    isFavorite: !!entry.isFavorite,
   };
 }
 
@@ -166,6 +167,7 @@ export async function saveTranslationHistory(entry) {
     translatedText: entry.translated,
     translationType: entry.translationType || 'text',
     createdAt: entry.rawTime || new Date().toISOString(),
+    isFavorite: !!entry.isFavorite,
   };
 
   writeHistory([saved, ...history]);
@@ -181,6 +183,49 @@ export async function clearTranslationHistory() {
   localStorage.removeItem(getStorageKey());
 }
 
+export async function toggleFavoriteTranslation(id) {
+  const history = readHistory();
+  const updated = history.map((item) => {
+    const itemId = item.id || item.createdAt || item.rawTime;
+    if (itemId === id) {
+      return { ...item, isFavorite: !item.isFavorite };
+    }
+    return item;
+  });
+  writeHistory(updated);
+}
+
 export async function fetchAnalytics() {
   return aggregateAnalytics(readHistory().map(mapToFrontend));
+}
+
+export function getAllUsersLocalTranslations() {
+  const translations = [];
+  try {
+    const keys = Object.keys(localStorage).filter((k) =>
+      k.startsWith('voxai_translation_history:')
+    );
+    keys.forEach((key) => {
+      const email = key.split(':')[1];
+      const raw = localStorage.getItem(key);
+      const items = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(items)) {
+        items.forEach((item) => {
+          translations.push({
+            id: item.id || item.createdAt || item.rawTime || Date.now(),
+            original: item.originalText || item.original || '',
+            translated: item.translatedText || item.translated || '',
+            source: item.inputLanguage || item.source || '',
+            target: item.outputLanguage || item.target || '',
+            translationType: item.translationType || 'text',
+            createdAt: item.createdAt || item.rawTime || new Date().toISOString(),
+            userEmail: email,
+          });
+        });
+      }
+    });
+  } catch {
+    // ignore
+  }
+  return translations.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 }

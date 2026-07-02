@@ -88,6 +88,12 @@ function AnimatedSphere({ isListening, isSpeaking, isTranslating }) {
   );
 }
 
+// Simple deterministic pseudo-random helper to keep render function pure
+function seededRandom(seed) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
 function ParticleRing({ isActive }) {
   const ref = useRef();
   const count = 100;
@@ -96,9 +102,9 @@ function ParticleRing({ isActive }) {
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * Math.PI * 2;
-      const radius = 2.4 + Math.random() * 0.4;
+      const radius = 2.4 + seededRandom(i * 2) * 0.4;
       pos[i * 3] = Math.cos(angle) * radius;
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 0.5;
+      pos[i * 3 + 1] = (seededRandom(i * 2 + 1) - 0.5) * 0.5;
       pos[i * 3 + 2] = Math.sin(angle) * radius;
     }
     return pos;

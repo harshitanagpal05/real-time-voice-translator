@@ -41,13 +41,21 @@ export default function useTranslator() {
   const voiceEnabledRef = useRef(voiceEnabled);
   const networkRetriesRef = useRef(0);
 
-  sourceLangRef.current = sourceLang;
-  targetLangRef.current = targetLang;
-  voiceEnabledRef.current = voiceEnabled;
+  const settingsRef = useRef(initialSettings);
+
+  useEffect(() => {
+    sourceLangRef.current = sourceLang;
+    targetLangRef.current = targetLang;
+    voiceEnabledRef.current = voiceEnabled;
+  }, [sourceLang, targetLang, voiceEnabled]);
+
+  useEffect(() => {
+    settingsRef.current = loadSettings();
+  }); // runs after every render to keep settings updated safely
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setHistory([]);
+      setTimeout(() => setHistory([]), 0);
       return undefined;
     }
 
@@ -59,9 +67,6 @@ export default function useTranslator() {
     return () => { cancelled = true; };
   }, [isAuthenticated]);
 
-  const settingsRef = useRef(initialSettings);
-  settingsRef.current = loadSettings();
-
   const saveHistory = useCallback(async (entry) => {
     if (!loadSettings().saveHistory) return;
 
@@ -69,7 +74,7 @@ export default function useTranslator() {
       const recents = JSON.parse(localStorage.getItem('voxai_recent_langs') || '[]');
       const nextRecents = Array.from(new Set([entry.source, entry.target, ...recents])).slice(0, 10);
       localStorage.setItem('voxai_recent_langs', JSON.stringify(nextRecents));
-    } catch (e) {
+    } catch {
       // ignore
     }
 
@@ -106,7 +111,7 @@ export default function useTranslator() {
 
   const handleTranslateRef = useRef(null);
 
-  handleTranslateRef.current = async (text) => {
+  const handleTranslate = useCallback(async (text) => {
     if (!text || text.trim().length < 2) return;
 
     setIsTranslating(true);
@@ -141,7 +146,11 @@ export default function useTranslator() {
     } finally {
       setIsTranslating(false);
     }
-  };
+  }, [saveHistory, speakText]);
+
+  useEffect(() => {
+    handleTranslateRef.current = handleTranslate;
+  }, [handleTranslate]);
 
   const scheduleRestart = useCallback((delay = RESTART_DELAY_MS) => {
     if (restartTimerRef.current) clearTimeout(restartTimerRef.current);
@@ -176,7 +185,7 @@ export default function useTranslator() {
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      setError('Speech recognition requires Chrome or Edge.');
+      setTimeout(() => setError('Speech recognition requires Chrome or Edge.'), 0);
       return undefined;
     }
 

@@ -403,6 +403,19 @@
   text-decoration: underline;
 }
 
+/* ── Google Sign-In ── */
+.auth-google-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.auth-google-wrap > div {
+  width: 100% !important;
+  display: flex;
+  justify-content: center;
+}
+
 .auth-mobile-brand {
   display: none;
   align-items: center;

@@ -42,7 +42,7 @@ export default function LanguagesPage() {
         (l) =>
           l.label.toLowerCase().includes(q) ||
           l.nativeName.toLowerCase().includes(q) ||
-          l.code.toLowerCase().includes(q),
+          l.code.toLowerCase().includes(q)
       );
     }
     if (sortAlpha) {
@@ -68,21 +68,21 @@ export default function LanguagesPage() {
       <header className="languages-header">
         <div>
           <h1>Languages</h1>
-          <p>{LANGUAGES.length} languages supported</p>
+          <p>{LANGUAGES.length} supported languages</p>
         </div>
         <div className="languages-header-actions">
           <button
             type="button"
-            className={`lang-sort-btn ${sortAlpha ? 'active' : ''}`}
+            className={`lang-sort-btn btn-ghost ${sortAlpha ? 'active' : ''}`}
             onClick={() => setSortAlpha((v) => !v)}
           >
-            {sortAlpha ? 'A→Z ✓' : 'A→Z'}
+            {sortAlpha ? 'Sorted A-Z ✓' : 'Sort A-Z'}
           </button>
         </div>
       </header>
 
       <div className="languages-search">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <input
@@ -94,22 +94,24 @@ export default function LanguagesPage() {
       </div>
 
       {/* Quick select mode */}
-      <div className="lang-quick-select">
-        <span className="lang-quick-label">Quick select as:</span>
-        <button
-          type="button"
-          className={`lang-quick-btn ${selectMode === 'source' ? 'active' : ''}`}
-          onClick={() => setSelectMode(selectMode === 'source' ? null : 'source')}
-        >
-          Source Language
-        </button>
-        <button
-          type="button"
-          className={`lang-quick-btn ${selectMode === 'target' ? 'active' : ''}`}
-          onClick={() => setSelectMode(selectMode === 'target' ? null : 'target')}
-        >
-          Target Language
-        </button>
+      <div className="lang-quick-select glass-card">
+        <span className="lang-quick-label">Set language as default:</span>
+        <div className="lang-quick-actions">
+          <button
+            type="button"
+            className={`lang-quick-btn ${selectMode === 'source' ? 'active' : ''}`}
+            onClick={() => setSelectMode(selectMode === 'source' ? null : 'source')}
+          >
+            Source Input Language
+          </button>
+          <button
+            type="button"
+            className={`lang-quick-btn ${selectMode === 'target' ? 'active' : ''}`}
+            onClick={() => setSelectMode(selectMode === 'target' ? null : 'target')}
+          >
+            Target Output Language
+          </button>
+        </div>
       </div>
 
       {/* Favorites section */}
@@ -154,7 +156,7 @@ export default function LanguagesPage() {
 
       {/* All languages */}
       <section className="lang-section">
-        <h3 className="lang-section-title">🌐 All Languages</h3>
+        <h3 className="lang-section-title">🌐 Supported Languages</h3>
         <div className="lang-grid">
           <AnimatePresence>
             {filtered.map((lang, idx) => (
@@ -166,14 +168,14 @@ export default function LanguagesPage() {
                 onSelect={selectMode ? (code) => handleSelectLang(code, selectMode) : null}
                 isCurrentSource={settings.defaultSourceLang === lang.code}
                 isCurrentTarget={settings.defaultTargetLang === lang.code}
-                delay={Math.min(idx * 0.02, 0.4)}
+                delay={Math.min(idx * 0.02, 0.25)}
               />
             ))}
           </AnimatePresence>
         </div>
         {filtered.length === 0 && (
-          <div className="lang-empty">
-            <p>No languages match your search</p>
+          <div className="lang-empty glass-card">
+            <p>No languages match your search query</p>
           </div>
         )}
       </section>
@@ -184,7 +186,7 @@ export default function LanguagesPage() {
 function LanguageCard({ lang, isFav, onToggleFav, onSelect, isCurrentSource, isCurrentTarget, delay = 0 }) {
   return (
     <motion.div
-      className={`lang-card ${isCurrentSource ? 'current-source' : ''} ${isCurrentTarget ? 'current-target' : ''} ${onSelect ? 'selectable' : ''}`}
+      className={`lang-card glass-card ${isCurrentSource ? 'current-source' : ''} ${isCurrentTarget ? 'current-target' : ''} ${onSelect ? 'selectable' : ''}`}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
@@ -208,8 +210,8 @@ function LanguageCard({ lang, isFav, onToggleFav, onSelect, isCurrentSource, isC
         {lang.voiceSupport && <span className="lang-badge voice">🎤 Voice</span>}
         {lang.textSupport && <span className="lang-badge text">📝 Text</span>}
       </div>
-      {isCurrentSource && <span className="lang-current-badge source">Current Source</span>}
-      {isCurrentTarget && <span className="lang-current-badge target">Current Target</span>}
+      {isCurrentSource && <span className="lang-current-badge source">Input Source</span>}
+      {isCurrentTarget && <span className="lang-current-badge target">Output Target</span>}
     </motion.div>
   );
 }

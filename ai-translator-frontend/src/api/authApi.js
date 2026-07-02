@@ -47,22 +47,17 @@ export async function registerUser(name, email, password) {
 }
 
 export async function loginUser(email, password) {
-  // Local admin shortcut
-  if (email === 'admin@test.com' && password === 'admin123') {
-    return {
-      email,
-      fullName: 'Admin',
-      isAdmin: true,
-      token: null,
-    };
-  }
-
   const data = await postFastApiAuth('/login', {
     email,
     password,
   });
 
   return normalizeAuthResponse(data, email);
+}
+
+export async function googleLogin(credential) {
+  const data = await postFastApiAuth('/auth/google', { credential });
+  return normalizeAuthResponse(data, data?.email);
 }
 
 export async function fetchAdminUsers() {

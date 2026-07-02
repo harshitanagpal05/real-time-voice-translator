@@ -2,6 +2,8 @@
   "name": "voxai-translator",
   "private": true,
   "scripts": {
+    "build": "npm --prefix ./ai-translator-frontend run build",
+    "lint": "npm --prefix ./ai-translator-frontend run lint",
     "start": "powershell -ExecutionPolicy Bypass -File ./start.ps1",
     "dev:backend": "powershell -NoExit -Command \"Set-Location ./backend/API; python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload\"",
     "dev:frontend": "powershell -NoExit -Command \"Set-Location ./ai-translator-frontend; npm run dev\"",

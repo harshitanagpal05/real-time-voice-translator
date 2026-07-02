@@ -1,7 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
 import useTranslator from '../hooks/useTranslator';
 import { SPEECH_SYNTHESIS_LANG } from '../constants/languages';
@@ -20,9 +18,7 @@ function getStatusLabel({ error, isListening, isTranslating, isSpeaking }) {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
   const { settings } = useSettings();
-  const navigate = useNavigate();
   const translateRef = useRef(null);
   const historyRef = useRef(null);
   const languagesRef = useRef(null);
@@ -71,13 +67,19 @@ export default function DashboardPage() {
   return (
     <div className="dashboard-page-inner">
       <main className="dashboard-center">
+        {/* Header */}
         <header className="dash-top-header">
           <div>
-            <h1 className="dash-brand">VoxAI</h1>
+            <motion.h1
+              className="dash-brand"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              VoxAI
+            </motion.h1>
             <p className="dash-tagline">
               <span className="dash-tagline-gradient">Speak. Translate. Connect.</span>
             </p>
-            <p className="dash-desc">Real-time AI Voice Translation across multiple languages.</p>
           </div>
           <div className="dash-header-right">
             <label className="dash-voice-toggle">
@@ -86,12 +88,11 @@ export default function DashboardPage() {
                 checked={voiceEnabled}
                 onChange={() => setVoiceEnabled((v) => !v)}
               />
-              <span>Auto voice output</span>
+              <span className="dash-toggle-track">
+                <span className="dash-toggle-thumb" />
+              </span>
+              <span className="dash-toggle-label">Auto voice</span>
             </label>
-            {user?.isAdmin && (
-              <button type="button" className="dash-link-btn" onClick={() => navigate('/admin')}>Admin</button>
-            )}
-            <button type="button" className="dash-link-btn" onClick={() => navigate('/analytics')}>Analytics</button>
           </div>
         </header>
 
@@ -103,27 +104,44 @@ export default function DashboardPage() {
               className={`dash-mode-btn ${mode === 'voice' ? 'active' : ''}`}
               onClick={() => { setMode('voice'); stopListening(); }}
             >
-              🎙 Voice Translation
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 14c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v5c0 1.66 1.34 3 3 3z" />
+                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5" />
+              </svg>
+              Voice
             </button>
             <button
               type="button"
               className={`dash-mode-btn ${mode === 'text' ? 'active' : ''}`}
               onClick={() => { setMode('text'); stopListening(); }}
             >
-              ⌨ Text Translation
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 7V4h16v3" /><path d="M9 20h6" /><path d="M12 4v16" />
+              </svg>
+              Text
             </button>
+            <motion.div
+              className="dash-mode-indicator"
+              animate={{ x: mode === 'voice' ? 0 : '100%' }}
+              transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+            />
           </div>
         </div>
 
+        {/* Error */}
         <AnimatePresence>
           {error && (
             <motion.div className="dash-error" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
               {error}
               <button type="button" onClick={clearError} className="dash-error-dismiss" aria-label="Dismiss">×</button>
             </motion.div>
           )}
         </AnimatePresence>
 
+        {/* Voice Controls */}
         <AnimatePresence mode="wait">
           {mode === 'voice' && (
             <motion.div
@@ -149,8 +167,8 @@ export default function DashboardPage() {
                     type="button"
                     className="dash-control-btn start"
                     onClick={startListening}
-                    whileHover={{ scale: 1.03, y: -2 }}
-                    whileTap={{ scale: 0.97 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                     id="start-btn"
                   >
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -164,8 +182,8 @@ export default function DashboardPage() {
                     type="button"
                     className="dash-control-btn stop"
                     onClick={stopListening}
-                    whileHover={{ scale: 1.03, y: -2 }}
-                    whileTap={{ scale: 0.97 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                     id="stop-btn"
                   >
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
@@ -179,6 +197,7 @@ export default function DashboardPage() {
           )}
         </AnimatePresence>
 
+        {/* Translator Panel */}
         <section className="dash-cards-area" id="languages" ref={languagesRef}>
           <TranslatorPanel
             mode={mode}
@@ -199,9 +218,22 @@ export default function DashboardPage() {
           />
         </section>
 
+        {/* Feature chips */}
         <section className="dash-features">
-          {['Real-time Translation', 'Multi-Language', 'AI Voice Recognition', 'Natural Voice Output'].map((f) => (
-            <div key={f} className="dash-feature-chip">{f}</div>
+          {[
+            { icon: '⚡', label: 'Real-time' },
+            { icon: '🌍', label: '12 Languages' },
+            { icon: '🎙️', label: 'AI Voice' },
+            { icon: '🔒', label: 'Private' },
+          ].map((f) => (
+            <motion.div
+              key={f.label}
+              className="dash-feature-chip"
+              whileHover={{ scale: 1.05, y: -2 }}
+            >
+              <span>{f.icon}</span>
+              {f.label}
+            </motion.div>
           ))}
         </section>
 
@@ -209,7 +241,6 @@ export default function DashboardPage() {
           <div className="dash-footer-left">
             <span className="dash-footer-live"><span className="dash-live-dot on" /> Live</span>
             <span>Powered by AI</span>
-            <span>12+ Languages</span>
             <span>Secure &amp; Private</span>
           </div>
         </footer>

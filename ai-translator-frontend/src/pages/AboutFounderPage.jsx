@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import './InfoPage.css';
 import './AboutFounderPage.css';
@@ -58,17 +57,14 @@ function ExternalIcon() {
 }
 
 export default function AboutFounderPage() {
-  const navigate = useNavigate();
-
   return (
     <div className="info-page founder-page">
       <header className="info-page-header">
-        <button type="button" className="info-back" onClick={() => navigate('/dashboard')}>← Back to Dashboard</button>
         <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>About the Founder</motion.h1>
       </header>
 
       <motion.div
-        className="founder-profile-card"
+        className="founder-profile-card glass-card"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -105,7 +101,7 @@ export default function AboutFounderPage() {
 
       <div className="founder-vision-grid">
         <motion.div
-          className="founder-vision-card"
+          className="founder-vision-card glass-card"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
@@ -114,7 +110,7 @@ export default function AboutFounderPage() {
           <p>To make communication across different languages seamless using the power of Artificial Intelligence.</p>
         </motion.div>
         <motion.div
-          className="founder-vision-card"
+          className="founder-vision-card glass-card"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
@@ -137,7 +133,7 @@ export default function AboutFounderPage() {
             <motion.a
               key={link.id}
               href={link.href}
-              className={`founder-social-card founder-social-${link.id}`}
+              className={`founder-social-card founder-social-${link.id} glass-card`}
               target={link.external ? '_blank' : undefined}
               rel={link.external ? 'noopener noreferrer' : undefined}
               initial={{ opacity: 0, y: 16 }}

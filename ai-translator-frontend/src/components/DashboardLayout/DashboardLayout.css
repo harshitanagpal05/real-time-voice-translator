@@ -1,16 +1,47 @@
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
-  background: #000;
   position: relative;
 }
 
 .dashboard-layout-main {
   flex: 1;
-  min-width: 0;
+  overflow-y: auto;
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+}
+
+.dashboard-mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 250;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: rgba(6, 6, 10, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--text-primary);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.dashboard-mobile-toggle:hover {
+  background: rgba(6, 6, 10, 0.95);
+  border-color: var(--glass-border-strong);
+}
+
+@media (max-width: 900px) {
+  .dashboard-mobile-toggle {
+    display: flex;
+  }
+
+  .dashboard-layout-main {
+    padding-top: 0;
+  }
 }

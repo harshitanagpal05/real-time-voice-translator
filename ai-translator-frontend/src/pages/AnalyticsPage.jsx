@@ -10,7 +10,7 @@ Chart.register(...registerables);
 function StatCard({ icon, label, value, sub, delay = 0 }) {
   return (
     <motion.div
-      className="analytics-stat-card"
+      className="analytics-stat-card glass-card"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
@@ -27,6 +27,7 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [timeframe, setTimeframe] = useState('weekly'); // 'weekly' | 'monthly'
 
   const dailyChartRef = useRef(null);
   const donutChartRef = useRef(null);
@@ -50,7 +51,10 @@ export default function AnalyticsPage() {
   }, []);
 
   useEffect(() => {
-    load();
+    const timer = setTimeout(() => {
+      load();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [load]);
 
   // Render / Update Charts
@@ -58,9 +62,9 @@ export default function AnalyticsPage() {
     if (loading || error || !analytics || !analytics.totalTranslations) return;
 
     const style = getComputedStyle(document.documentElement);
-    const purple = style.getPropertyValue('--accent-purple').trim() || '#6A0DAD';
-    const orange = style.getPropertyValue('--accent-orange').trim() || '#FF8C00';
-    const magenta = style.getPropertyValue('--accent-magenta').trim() || '#E040FB';
+    const purple = style.getPropertyValue('--accent-purple').trim() || '#7c3aed';
+    const orange = style.getPropertyValue('--accent-orange').trim() || '#f97316';
+    const magenta = style.getPropertyValue('--accent-magenta').trim() || '#c084fc';
     const textPrimary = style.getPropertyValue('--text-primary').trim() || '#ffffff';
     const textSecondary = style.getPropertyValue('--text-secondary').trim() || '#a0a0a0';
 
@@ -77,32 +81,50 @@ export default function AnalyticsPage() {
       },
       scales: {
         x: {
-          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          grid: { color: 'rgba(255, 255, 255, 0.03)' },
           ticks: { color: textSecondary, font: { family: 'Sora, sans-serif', size: 10 } }
         },
         y: {
-          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          grid: { color: 'rgba(255, 255, 255, 0.03)' },
           ticks: { color: textSecondary, font: { family: 'Sora, sans-serif', size: 10 } }
         }
       }
     };
 
-    // 1. Daily Translations (Bar Chart)
+    // 1. Daily/Monthly Translations (Bar Chart)
     if (dailyChartRef.current) {
       if (dailyChartInst.current) dailyChartInst.current.destroy();
 
-      const dailyData = (analytics.dailyCounts || []).map((d) => ({
-        label: new Date(d.date).toLocaleDateString('en', { weekday: 'short' }),
-        count: d.count,
-      }));
+      let labels = [];
+      let counts = [];
+
+      if (timeframe === 'weekly') {
+        const dailyData = (analytics.dailyCounts || []).map((d) => ({
+          label: new Date(d.date).toLocaleDateString('en', { weekday: 'short' }),
+          count: d.count,
+        }));
+        labels = dailyData.map((d) => d.label);
+        counts = dailyData.map((d) => d.count);
+      } else {
+        const monthlyData = (analytics.monthlyCounts || []).map((m) => {
+          const [year, month] = m.month.split('-');
+          const d = new Date(year, parseInt(month) - 1);
+          return {
+            label: d.toLocaleDateString('en', { month: 'short' }),
+            count: m.count,
+          };
+        });
+        labels = monthlyData.map((m) => m.label);
+        counts = monthlyData.map((m) => m.count);
+      }
 
       dailyChartInst.current = new Chart(dailyChartRef.current, {
         type: 'bar',
         data: {
-          labels: dailyData.map((d) => d.label),
+          labels: labels,
           datasets: [{
             label: 'Translations',
-            data: dailyData.map((d) => d.count),
+            data: counts,
             backgroundColor: purple,
             borderColor: magenta,
             borderWidth: 1,
@@ -130,7 +152,7 @@ export default function AnalyticsPage() {
           datasets: [{
             data: [analytics.voiceCount || 0, analytics.textCount || 0],
             backgroundColor: [orange, purple],
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderColor: 'rgba(255, 255, 255, 0.08)',
             borderWidth: 1,
           }]
         },
@@ -146,7 +168,7 @@ export default function AnalyticsPage() {
               }
             }
           },
-          cutout: '60%'
+          cutout: '65%'
         }
       });
     }
@@ -155,7 +177,7 @@ export default function AnalyticsPage() {
     if (pairsChartRef.current) {
       if (pairsChartInst.current) pairsChartInst.current.destroy();
 
-      const pairData = (analytics.langPairs || []).map((p) => ({
+      const pairData = (analytics.langPairs || []).slice(0, 5).map((p) => ({
         label: `${(LANGUAGE_MAP[p.source] || p.source).slice(0, 5)} → ${(LANGUAGE_MAP[p.target] || p.target).slice(0, 5)}`,
         count: p.count,
       }));
@@ -189,7 +211,7 @@ export default function AnalyticsPage() {
       if (donutChartInst.current) donutChartInst.current.destroy();
       if (pairsChartInst.current) pairsChartInst.current.destroy();
     };
-  }, [loading, error, analytics]);
+  }, [loading, error, analytics, timeframe]);
 
   if (loading) {
     return (
@@ -200,7 +222,7 @@ export default function AnalyticsPage() {
         </header>
         <div className="analytics-stats-grid">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="analytics-stat-card skeleton-card">
+            <div key={i} className="analytics-stat-card skeleton-card glass-card">
               <div className="skeleton-line w40" />
               <div className="skeleton-line w60" />
             </div>
@@ -217,7 +239,7 @@ export default function AnalyticsPage() {
           <h1>Translation Analytics</h1>
         </header>
         <div className="history-error">
-          {error}
+          <span>{error}</span>
           <button type="button" onClick={load} className="history-retry-btn">Retry</button>
         </div>
       </div>
@@ -234,7 +256,7 @@ export default function AnalyticsPage() {
           <h1>Translation Analytics</h1>
           <p>Insights from your translations</p>
         </header>
-        <motion.div className="analytics-empty" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div className="analytics-empty glass-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="analytics-empty-icon">📊</div>
           <h3>No analytics yet</h3>
           <p>Start translating to see insights about your usage patterns, language preferences, and activity timeline.</p>
@@ -243,56 +265,65 @@ export default function AnalyticsPage() {
     );
   }
 
-  // Success rate is 100% since we only record successful translations
-  const successRate = 100;
+  // Compute Today's translations count
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayCount = (a.dailyCounts || []).find((d) => d.date === todayKey)?.count || 0;
+
+  // Compute Favorite Target Language
+  const favTargetLang = LANGUAGE_MAP[a.topTargetLang] || a.topTargetLang || '—';
 
   return (
     <div className="analytics-page">
       <header className="analytics-pg-header">
-        <h1>Translation Analytics</h1>
-        <p>Insights from {a.totalTranslations} translation{a.totalTranslations !== 1 ? 's' : ''}</p>
+        <div>
+          <h1>Translation Analytics</h1>
+          <p>Insights from {a.totalTranslations} translation{a.totalTranslations !== 1 ? 's' : ''}</p>
+        </div>
       </header>
 
       <div className="analytics-stats-grid">
         <StatCard icon="📊" label="Total Translations" value={a.totalTranslations} delay={0.05} />
-        <StatCard icon="🎤" label="Voice Translations" value={a.voiceCount} delay={0.1} />
-        <StatCard icon="📝" label="Text Translations" value={a.textCount} delay={0.15} />
-        <StatCard
-          icon="🌍"
-          label="Top Source Language"
-          value={LANGUAGE_MAP[a.topSourceLang] || a.topSourceLang || '—'}
-          delay={0.2}
-        />
-        <StatCard
-          icon="🎯"
-          label="Top Target Language"
-          value={LANGUAGE_MAP[a.topTargetLang] || a.topTargetLang || '—'}
-          delay={0.25}
-        />
-        <StatCard
-          icon="✅"
-          label="Translation Success Rate"
-          value={`${successRate}%`}
-          delay={0.3}
-        />
+        <StatCard icon="📅" label="Today's Usage" value={todayCount} delay={0.1} />
+        <StatCard icon="⭐" label="Favorite Language" value={favTargetLang} delay={0.15} />
+        <StatCard icon="🎙️" label="Voice Translations" value={a.voiceCount} delay={0.2} />
+        <StatCard icon="📝" label="Text Translations" value={a.textCount} delay={0.25} />
+        <StatCard icon="✅" label="Success Rate" value="100%" delay={0.3} />
       </div>
 
       <div className="analytics-charts-grid">
-        <div className="analytics-chart-card">
-          <h3 className="analytics-chart-title">Daily Translations (Last 7 Days)</h3>
+        <div className="analytics-chart-card glass-card">
+          <div className="analytics-chart-header">
+            <h3 className="analytics-chart-title">Usage Volume</h3>
+            <div className="analytics-timeframe-selector">
+              <button
+                type="button"
+                className={`timeframe-btn ${timeframe === 'weekly' ? 'active' : ''}`}
+                onClick={() => setTimeframe('weekly')}
+              >
+                Weekly
+              </button>
+              <button
+                type="button"
+                className={`timeframe-btn ${timeframe === 'monthly' ? 'active' : ''}`}
+                onClick={() => setTimeframe('monthly')}
+              >
+                Monthly
+              </button>
+            </div>
+          </div>
           <div className="chart-canvas-wrapper">
             <canvas ref={dailyChartRef} />
           </div>
         </div>
 
-        <div className="analytics-chart-card">
+        <div className="analytics-chart-card glass-card">
           <h3 className="analytics-chart-title">Voice vs Text Breakdown</h3>
           <div className="chart-canvas-wrapper donut-wrapper">
             <canvas ref={donutChartRef} />
           </div>
         </div>
 
-        <div className="analytics-chart-card horizontal-bar-chart-card">
+        <div className="analytics-chart-card horizontal-bar-chart-card glass-card" style={{ gridColumn: '1 / -1' }}>
           <h3 className="analytics-chart-title">Top Language Pairs</h3>
           <div className="chart-canvas-wrapper">
             <canvas ref={pairsChartRef} />
@@ -308,7 +339,7 @@ export default function AnalyticsPage() {
             {a.recentActivity.slice(0, 10).map((item, i) => (
               <motion.div
                 key={item._id || i}
-                className="analytics-timeline-item"
+                className="analytics-timeline-item glass-card"
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.03 }}
@@ -318,13 +349,13 @@ export default function AnalyticsPage() {
                   <span className="timeline-pair">
                     {LANGUAGE_MAP[item.inputLanguage] || item.inputLanguage} → {LANGUAGE_MAP[item.outputLanguage] || item.outputLanguage}
                   </span>
-                  <span className="timeline-text">{item.originalText?.slice(0, 50)}{item.originalText?.length > 50 ? '...' : ''}</span>
+                  <span className="timeline-text">{item.originalText?.slice(0, 70)}{item.originalText?.length > 70 ? '...' : ''}</span>
                   <span className="timeline-time">
                     {new Date(item.createdAt).toLocaleString()}
                   </span>
                 </div>
                 <span className={`timeline-type ${item.translationType || 'text'}`}>
-                  {item.translationType === 'voice' ? '🎤' : '📝'}
+                  {item.translationType === 'voice' ? '🎙️' : '📝'}
                 </span>
               </motion.div>
             ))}

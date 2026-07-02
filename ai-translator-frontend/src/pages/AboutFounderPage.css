@@ -1,94 +1,101 @@
+/* ═══════════════════ ABOUT FOUNDER PAGE — PREMIUM ═══════════════════ */
+
 .founder-page {
-  max-width: 720px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .founder-profile-card {
   text-align: center;
-  padding: 40px 32px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.4),
-    0 0 40px rgba(106, 13, 173, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  padding: 44px 36px;
   margin-bottom: 24px;
   position: relative;
   overflow: hidden;
-  animation: founderCardPulse 4s ease-in-out infinite alternate;
+  animation: founderCardPulse 5s ease-in-out infinite alternate;
 }
 
 @keyframes founderCardPulse {
-  0% { box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4), 0 0 30px rgba(106, 13, 173, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06); }
-  100% { box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4), 0 0 50px rgba(255, 140, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+  0% {
+    box-shadow: var(--shadow-md), 0 0 25px rgba(124, 58, 237, 0.08);
+  }
+  100% {
+    box-shadow: var(--shadow-lg), 0 0 45px rgba(249, 115, 22, 0.15);
+  }
 }
 
 .founder-profile-card::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 0%, rgba(255, 140, 0, 0.08), transparent 60%);
+  background: radial-gradient(circle at 50% 0%, rgba(249, 115, 22, 0.06), transparent 60%);
   pointer-events: none;
 }
 
 .founder-avatar-wrap {
   position: relative;
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 20px;
+  width: 108px;
+  height: 108px;
+  margin: 0 auto 24px;
 }
 
 .founder-avatar-glow {
   position: absolute;
-  inset: -10px;
+  inset: -12px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(106, 13, 173, 0.4), transparent 70%);
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.35), transparent 70%);
   animation: founderGlow 3s ease-in-out infinite alternate;
 }
 
 @keyframes founderGlow {
-  0% { opacity: 0.6; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1.08); }
+  0% { opacity: 0.5; transform: scale(1); }
+  100% { opacity: 0.9; transform: scale(1.06); }
 }
 
 .founder-avatar {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 108px;
+  height: 108px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6A0DAD, #FF8C00);
+  background: var(--gradient-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-family: 'Sora', sans-serif;
+  font-size: 2.2rem;
   font-weight: 800;
   color: #fff;
-  box-shadow: 0 0 30px rgba(106, 13, 173, 0.5);
+  box-shadow: 0 0 32px rgba(124, 58, 237, 0.4);
 }
 
 .founder-name {
+  font-family: 'Sora', sans-serif;
   font-size: 1.8rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-primary);
   margin: 0 0 6px;
   position: relative;
 }
 
 .founder-role {
   display: block;
-  font-size: 0.85rem;
-  color: #FF8C00;
+  font-size: 0.88rem;
+  color: var(--accent-orange);
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   position: relative;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .founder-bio {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   line-height: 1.7;
-  color: #aaa;
-  margin: 0 0 24px;
+  color: var(--text-secondary);
+  margin: 0 0 28px;
   position: relative;
+  max-width: 580px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .founder-passions {
@@ -100,22 +107,25 @@
   flex-direction: column;
   gap: 10px;
   position: relative;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .founder-passions li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 0.88rem;
-  color: #ccc;
+  gap: 12px;
+  padding: 12px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--glass-border);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 .founder-passions svg {
-  color: #FF8C00;
+  color: var(--accent-orange);
   flex-shrink: 0;
 }
 
@@ -123,50 +133,49 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  margin-top: 16px;
 }
 
 .founder-vision-card {
   padding: 24px;
-  border-radius: 18px;
-  background: rgba(106, 13, 173, 0.08);
-  border: 1px solid rgba(106, 13, 173, 0.2);
 }
 
 .founder-vision-label {
   display: inline-block;
-  font-size: 0.7rem;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #E040FB;
+  letter-spacing: 0.12em;
+  color: var(--accent-magenta);
   margin-bottom: 12px;
 }
 
 .founder-vision-label.mission {
-  color: #FF8C00;
+  color: var(--accent-orange);
 }
 
 .founder-vision-card p {
   font-size: 0.92rem;
   line-height: 1.65;
-  color: #ccc;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .founder-connect {
   margin-top: 32px;
   padding: 28px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-border);
 }
 
 .founder-connect-title {
+  font-family: 'Sora', sans-serif;
   font-size: 1.25rem;
   font-weight: 800;
   color: #fff;
   margin: 0 0 8px;
-  background: linear-gradient(135deg, #E040FB, #FF8C00);
+  background: linear-gradient(135deg, var(--accent-magenta), var(--accent-orange));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -174,8 +183,8 @@
 
 .founder-connect-desc {
   font-size: 0.88rem;
-  color: #888;
-  margin: 0 0 20px;
+  color: var(--text-secondary);
+  margin: 0 0 24px;
   line-height: 1.5;
 }
 
@@ -190,12 +199,8 @@
   align-items: center;
   gap: 12px;
   padding: 16px 18px;
-  border-radius: 14px;
-  text-decoration: none;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #ddd;
-  transition: all 0.3s ease;
+  color: var(--text-secondary);
+  transition: all var(--transition-base);
   position: relative;
   overflow: hidden;
 }
@@ -204,15 +209,16 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(106, 13, 173, 0.15), rgba(255, 140, 0, 0.08));
+  background: var(--gradient-subtle);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--transition-base);
 }
 
 .founder-social-card:hover {
-  border-color: rgba(106, 13, 173, 0.4);
-  box-shadow: 0 8px 28px rgba(106, 13, 173, 0.2);
-  color: #fff;
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.12);
+  color: var(--text-primary);
+  transform: translateY(-2px);
 }
 
 .founder-social-card:hover::before {
@@ -232,12 +238,12 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   flex-shrink: 0;
 }
 
 .founder-social-linkedin .founder-social-icon {
-  background: rgba(10, 102, 194, 0.2);
+  background: rgba(10, 102, 194, 0.15);
   color: #0a66c2;
 }
 
@@ -247,8 +253,8 @@
 }
 
 .founder-social-email .founder-social-icon {
-  background: rgba(255, 140, 0, 0.15);
-  color: #FF8C00;
+  background: rgba(255, 140, 0, 0.12);
+  color: var(--accent-orange);
 }
 
 .founder-social-label {
@@ -258,9 +264,9 @@
 }
 
 .founder-link-external {
-  opacity: 0.5;
+  opacity: 0.4;
   flex-shrink: 0;
-  transition: opacity 0.2s, transform 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .founder-social-card:hover .founder-link-external {
@@ -268,9 +274,18 @@
   transform: translate(2px, -2px);
 }
 
+@media (max-width: 900px) {
+  .info-page.founder-page {
+    padding-top: 64px;
+  }
+}
+
 @media (max-width: 640px) {
   .founder-vision-grid { grid-template-columns: 1fr; }
   .founder-social-grid { grid-template-columns: 1fr; }
   .founder-profile-card { padding: 32px 20px; }
   .founder-connect { padding: 20px; }
+  .info-page.founder-page {
+    padding-top: 60px;
+  }
 }
