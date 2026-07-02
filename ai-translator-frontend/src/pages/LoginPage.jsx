@@ -143,7 +143,9 @@ export default function LoginPage() {
         </div>
 
         {hasGoogleSignIn ? (
-          <div className="auth-google-wrap">
+          <>
+            <div className="auth-google-caption">Continue with <span>Google</span></div>
+            <div className="auth-google-wrap">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => setErrors({ form: 'Google sign-in failed. Please try again.' })}
@@ -153,7 +155,8 @@ export default function LoginPage() {
               width="100%"
               text="signin_with"
             />
-          </div>
+            </div>
+          </>
         ) : (
           <div className="auth-google-wrap" style={{ color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.5 }}>
             Google sign-in is unavailable in this deployment.
