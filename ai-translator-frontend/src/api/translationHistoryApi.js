@@ -1,49 +1,186 @@
 /**
- * Translation history — persisted via MongoDB backend.
+ * Translation history — stored locally per signed-in user.
  */
 
-import api from './api';
+import { getSession } from '../utils/session';
+
+const STORAGE_PREFIX = 'voxai_translation_history';
+const MAX_HISTORY = 50;
+
+function getStorageKey() {
+  const email = getSession()?.email?.toLowerCase() || 'guest';
+  return `${STORAGE_PREFIX}:${email}`;
+}
+
+function readHistory() {
+  try {
+    const raw = localStorage.getItem(getStorageKey());
+    const history = raw ? JSON.parse(raw) : [];
+    return Array.isArray(history) ? history : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeHistory(history) {
+  localStorage.setItem(getStorageKey(), JSON.stringify(history.slice(0, MAX_HISTORY)));
+}
 
 function mapToFrontend(entry) {
+  const rawTime = entry.createdAt || entry.rawTime || new Date().toISOString();
+
   return {
-    id: entry._id,
-    original: entry.originalText,
-    translated: entry.translatedText,
-    source: entry.inputLanguage,
-    target: entry.outputLanguage,
+    id: entry.id || rawTime,
+    original: entry.originalText || entry.original || '',
+    translated: entry.translatedText || entry.translated || '',
+    source: entry.inputLanguage || entry.source || '',
+    target: entry.outputLanguage || entry.target || '',
     translationType: entry.translationType || 'text',
     time: entry.createdAt
       ? new Date(entry.createdAt).toLocaleString()
-      : new Date().toLocaleString(),
-    rawTime: entry.createdAt || new Date().toISOString(),
+      : entry.time || new Date(rawTime).toLocaleString(),
+    rawTime,
+  };
+}
+
+function mapToAnalytics(entry) {
+  const rawTime = entry.rawTime || entry.createdAt || new Date().toISOString();
+
+  return {
+    _id: entry.id || rawTime,
+    inputLanguage: entry.source || entry.inputLanguage || '',
+    outputLanguage: entry.target || entry.outputLanguage || '',
+    originalText: entry.original || entry.originalText || '',
+    translatedText: entry.translated || entry.translatedText || '',
+    translationType: entry.translationType || 'text',
+    createdAt: rawTime,
+  };
+}
+
+function aggregateAnalytics(history) {
+  const totalTranslations = history.length;
+  const voiceCount = history.filter((item) => item.translationType === 'voice').length;
+  const textCount = totalTranslations - voiceCount;
+
+  const countBy = (getter) => {
+    const counts = new Map();
+    history.forEach((item) => {
+      const key = getter(item);
+      if (!key) return;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([key, count]) => ({ key, count }));
+  };
+
+  const topSourceLang = countBy((item) => item.source)[0]?.key || null;
+  const topTargetLang = countBy((item) => item.target)[0]?.key || null;
+
+  const langPairCounts = new Map();
+  history.forEach((item) => {
+    if (!item.source || !item.target) return;
+    const pairKey = `${item.source}|||${item.target}`;
+    const current = langPairCounts.get(pairKey) || 0;
+    langPairCounts.set(pairKey, current + 1);
+  });
+
+  const langPairs = Array.from(langPairCounts.entries())
+    .map(([pairKey, count]) => {
+      const [source, target] = pairKey.split('|||');
+      return { source, target, count };
+    })
+    .sort((a, b) => b.count - a.count);
+
+  const topLangPair = langPairs[0] || null;
+
+  const dailyCountsMap = new Map();
+  const weeklyCountsMap = new Map();
+  const monthlyCountsMap = new Map();
+
+  history.forEach((item) => {
+    const date = new Date(item.rawTime || item.createdAt || Date.now());
+    if (Number.isNaN(date.getTime())) return;
+
+    const dayKey = date.toISOString().slice(0, 10);
+    dailyCountsMap.set(dayKey, (dailyCountsMap.get(dayKey) || 0) + 1);
+
+    const weekStart = new Date(date);
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+    const weekKey = weekStart.toISOString().slice(0, 10);
+    weeklyCountsMap.set(weekKey, (weeklyCountsMap.get(weekKey) || 0) + 1);
+
+    const monthKey = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+    monthlyCountsMap.set(monthKey, (monthlyCountsMap.get(monthKey) || 0) + 1);
+  });
+
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setHours(0, 0, 0, 0);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+
+  const fourWeeksAgo = new Date();
+  fourWeeksAgo.setHours(0, 0, 0, 0);
+  fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 27);
+
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setDate(1);
+  sixMonthsAgo.setHours(0, 0, 0, 0);
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+
+  return {
+    totalTranslations,
+    voiceCount,
+    textCount,
+    topSourceLang,
+    topTargetLang,
+    topLangPair,
+    langPairs,
+    dailyCounts: Array.from(dailyCountsMap.entries())
+      .filter(([date]) => new Date(date) >= sevenDaysAgo)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, count]) => ({ date, count })),
+    weeklyCounts: Array.from(weeklyCountsMap.entries())
+      .filter(([date]) => new Date(date) >= fourWeeksAgo)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([week, count]) => ({ week, count })),
+    monthlyCounts: Array.from(monthlyCountsMap.entries())
+      .filter(([month]) => new Date(`${month}-01`) >= sixMonthsAgo)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([month, count]) => ({ month, count })),
+    recentActivity: history.slice(0, 20).map(mapToAnalytics),
   };
 }
 
 export async function fetchTranslationHistory() {
-  const { data } = await api.get('/translations/history');
-  return (data.translations || []).map(mapToFrontend);
+  return readHistory().map(mapToFrontend);
 }
 
 export async function saveTranslationHistory(entry) {
-  const { data } = await api.post('/translations', {
+  const history = readHistory();
+  const saved = {
+    id: entry.id || crypto.randomUUID(),
     inputLanguage: entry.source,
     outputLanguage: entry.target,
     originalText: entry.original,
     translatedText: entry.translated,
     translationType: entry.translationType || 'text',
-  });
-  return mapToFrontend(data.translation);
+    createdAt: entry.rawTime || new Date().toISOString(),
+  };
+
+  writeHistory([saved, ...history]);
+  return mapToFrontend(saved);
 }
 
 export async function deleteTranslationHistory(id) {
-  await api.delete(`/translations/${id}`);
+  const history = readHistory().filter((item) => (item.id || item.rawTime) !== id);
+  writeHistory(history);
 }
 
 export async function clearTranslationHistory() {
-  await api.delete('/translations');
+  localStorage.removeItem(getStorageKey());
 }
 
 export async function fetchAnalytics() {
-  const { data } = await api.get('/translations/analytics');
-  return data;
+  return aggregateAnalytics(readHistory().map(mapToFrontend));
 }

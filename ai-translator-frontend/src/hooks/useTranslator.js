@@ -11,7 +11,6 @@ import {
   clearTranslationHistory,
 } from '../api/translationHistoryApi';
 import { useAuth } from '../context/AuthContext';
-import { getToken } from '../utils/session';
 import { SPEECH_RECOGNITION_LANG, SPEECH_SYNTHESIS_LANG } from '../constants/languages';
 import { loadSettings, getVoiceRate } from '../utils/settings';
 
@@ -47,7 +46,7 @@ export default function useTranslator() {
   voiceEnabledRef.current = voiceEnabled;
 
   useEffect(() => {
-    if (!isAuthenticated || !getToken()) {
+    if (!isAuthenticated) {
       setHistory([]);
       return undefined;
     }
@@ -64,7 +63,7 @@ export default function useTranslator() {
   settingsRef.current = loadSettings();
 
   const saveHistory = useCallback(async (entry) => {
-    if (!loadSettings().saveHistory || !getToken()) return;
+    if (!loadSettings().saveHistory) return;
 
     try {
       const recents = JSON.parse(localStorage.getItem('voxai_recent_langs') || '[]');
@@ -83,12 +82,10 @@ export default function useTranslator() {
   }, []);
 
   const clearHistory = useCallback(async () => {
-    if (getToken()) {
-      try {
-        await clearTranslationHistory();
-      } catch {
-        /* keep local clear */
-      }
+    try {
+      await clearTranslationHistory();
+    } catch {
+      /* keep local clear */
     }
     setHistory([]);
   }, []);
