@@ -1,11 +1,16 @@
 /**
- * authApi.js — Authentication via VoxAI Express backend.
+ * authApi.js — Authentication via VoxAI FastAPI backend.
  */
 
 import api from './api';
 
 export async function registerUser(name, email, password) {
-  const { data } = await api.post('/auth/register', { name, email, password });
+  const { data } = await api.post('/register', {
+    name,
+    email,
+    password,
+  });
+
   return {
     token: data.token,
     email: data.user.email,
@@ -15,11 +20,21 @@ export async function registerUser(name, email, password) {
 }
 
 export async function loginUser(email, password) {
+  // Local admin shortcut
   if (email === 'admin@test.com' && password === 'admin123') {
-    return { email, fullName: 'Admin', isAdmin: true, token: null };
+    return {
+      email,
+      fullName: 'Admin',
+      isAdmin: true,
+      token: null,
+    };
   }
 
-  const { data } = await api.post('/auth/login', { email, password });
+  const { data } = await api.post('/login', {
+    email,
+    password,
+  });
+
   return {
     token: data.token,
     email: data.user.email,
@@ -29,7 +44,8 @@ export async function loginUser(email, password) {
 }
 
 export async function fetchAdminUsers() {
-  return JSON.parse(localStorage.getItem('registered_users') || '[]');
+  const { data } = await api.get('/admin/users');
+  return data;
 }
 
 export async function checkBackendHealth() {
@@ -37,7 +53,11 @@ export async function checkBackendHealth() {
     const root = import.meta.env.DEV
       ? ''
       : (import.meta.env.VITE_API_URL || 'http://localhost:5000');
-    const res = await fetch(`${root}/health`, { signal: AbortSignal.timeout(3000) });
+
+    const res = await fetch(`${root}/`, {
+      signal: AbortSignal.timeout(3000),
+    });
+
     return res.ok;
   } catch {
     return false;
