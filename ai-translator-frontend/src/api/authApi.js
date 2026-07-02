@@ -4,6 +4,21 @@
 
 import api from './api';
 
+function normalizeAuthResponse(data, fallbackEmail, fallbackName) {
+  if (data?.error) {
+    throw new Error(data.error);
+  }
+
+  const resolvedEmail = data?.email ?? fallbackEmail;
+
+  return {
+    token: data?.token ?? null,
+    email: resolvedEmail,
+    fullName: data?.name ?? fallbackName ?? (resolvedEmail?.split('@')[0] ?? ''),
+    isAdmin: data?.role === 'admin',
+  };
+}
+
 export async function registerUser(name, email, password) {
   const { data } = await api.post('/register', {
     name,
@@ -11,12 +26,7 @@ export async function registerUser(name, email, password) {
     password,
   });
 
-  return {
-    token: data.token,
-    email: data.user.email,
-    fullName: data.user.name,
-    isAdmin: false,
-  };
+  return normalizeAuthResponse(data, email, name);
 }
 
 export async function loginUser(email, password) {
@@ -35,12 +45,7 @@ export async function loginUser(email, password) {
     password,
   });
 
-  return {
-    token: data.token,
-    email: data.user.email,
-    fullName: data.user.name,
-    isAdmin: false,
-  };
+  return normalizeAuthResponse(data, email);
 }
 
 export async function fetchAdminUsers() {
