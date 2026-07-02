@@ -5,6 +5,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import AuthLayout from '../components/Auth/AuthLayout';
 import { loginUser, googleLogin } from '../api/authApi';
 import { useAuth } from '../context/AuthContext';
+import { hasGoogleSignIn } from '../config/googleAuth';
 
 function validateEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -141,17 +142,23 @@ export default function LoginPage() {
           <span>or continue with</span>
         </div>
 
-        <div className="auth-google-wrap">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => setErrors({ form: 'Google sign-in failed. Please try again.' })}
-            theme="filled_black"
-            size="large"
-            shape="pill"
-            width="100%"
-            text="signin_with"
-          />
-        </div>
+        {hasGoogleSignIn ? (
+          <div className="auth-google-wrap">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setErrors({ form: 'Google sign-in failed. Please try again.' })}
+              theme="filled_black"
+              size="large"
+              shape="pill"
+              width="100%"
+              text="signin_with"
+            />
+          </div>
+        ) : (
+          <div className="auth-google-wrap" style={{ color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.5 }}>
+            Google sign-in is unavailable in this deployment.
+          </div>
+        )}
 
         <p className="auth-switch">
           Don&apos;t have an account?

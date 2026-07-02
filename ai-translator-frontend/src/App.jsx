@@ -7,6 +7,7 @@ import { SettingsProvider } from './context/SettingsContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardLayout from './components/DashboardLayout/DashboardLayout';
 import AdminLayout from './components/AdminLayout/AdminLayout';
+import { GOOGLE_CLIENT_ID, hasGoogleSignIn } from './config/googleAuth';
 
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
@@ -24,9 +25,6 @@ const AdminAnalyticsPage = lazy(() => import('./pages/admin/AdminAnalyticsPage')
 const AdminActivityPage = lazy(() => import('./pages/admin/AdminActivityPage'));
 const AdminSystemPage = lazy(() => import('./pages/admin/AdminSystemPage'));
 const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettingsPage'));
-
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-const hasGoogleClientId = Boolean(GOOGLE_CLIENT_ID);
 
 function GuestRoute({ children }) {
   const { isAuthenticated, user } = useAuth();
@@ -111,28 +109,23 @@ function AppRoutes() {
 }
 
 export default function App() {
-  if (!hasGoogleClientId) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '2rem', textAlign: 'center', color: 'var(--text-primary)' }}>
-        <div>
-          <h1 style={{ marginBottom: '0.75rem' }}>Google sign-in is not configured</h1>
-          <p style={{ maxWidth: '42rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-            Add <strong>VITE_GOOGLE_CLIENT_ID</strong> to <strong>ai-translator-frontend/.env</strong> and register <strong>http://localhost:5173</strong> in Google Cloud Console as an authorized JavaScript origin.
-          </p>
-        </div>
-      </div>
-    );
+  const app = (
+    <BrowserRouter>
+      <AuthProvider>
+        <SettingsProvider>
+          <AppRoutes />
+        </SettingsProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+
+  if (!hasGoogleSignIn) {
+    return app;
   }
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <BrowserRouter>
-        <AuthProvider>
-          <SettingsProvider>
-            <AppRoutes />
-          </SettingsProvider>
-        </AuthProvider>
-      </BrowserRouter>
+      {app}
     </GoogleOAuthProvider>
   );
 }
