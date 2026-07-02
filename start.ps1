@@ -96,7 +96,7 @@ Start-Sleep -Seconds 2
 
 
 
-Write-Host "  [3/3] Frontend    -> http://127.0.0.1:$frontendPort" -ForegroundColor Yellow
+Write-Host "  [3/3] Frontend    -> http://localhost:$frontendPort" -ForegroundColor Yellow
 
 Start-Process powershell -ArgumentList @(
 
@@ -104,7 +104,7 @@ Start-Process powershell -ArgumentList @(
 
   "-Command",
 
-  "Set-Location '$root\ai-translator-frontend'; Write-Host 'Frontend on port $frontendPort' -ForegroundColor Green; npm run dev -- --port $frontendPort --host 127.0.0.1"
+  "Set-Location '$root\ai-translator-frontend'; Write-Host 'Frontend on port $frontendPort' -ForegroundColor Green; npm run dev -- --port $frontendPort --host localhost"
 
 )
 
@@ -118,7 +118,7 @@ Write-Host ""
 
 Write-Host "  Servers launched in separate windows." -ForegroundColor Green
 
-Write-Host "  Open: http://127.0.0.1:$frontendPort" -ForegroundColor White
+Write-Host "  Open: http://localhost:$frontendPort" -ForegroundColor White
 
 Write-Host ""
 

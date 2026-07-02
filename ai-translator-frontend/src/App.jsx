@@ -26,6 +26,7 @@ const AdminSystemPage = lazy(() => import('./pages/admin/AdminSystemPage'));
 const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettingsPage'));
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+const hasGoogleClientId = Boolean(GOOGLE_CLIENT_ID);
 
 function GuestRoute({ children }) {
   const { isAuthenticated, user } = useAuth();
@@ -110,6 +111,19 @@ function AppRoutes() {
 }
 
 export default function App() {
+  if (!hasGoogleClientId) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '2rem', textAlign: 'center', color: 'var(--text-primary)' }}>
+        <div>
+          <h1 style={{ marginBottom: '0.75rem' }}>Google sign-in is not configured</h1>
+          <p style={{ maxWidth: '42rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            Add <strong>VITE_GOOGLE_CLIENT_ID</strong> to <strong>ai-translator-frontend/.env</strong> and register <strong>http://localhost:5173</strong> in Google Cloud Console as an authorized JavaScript origin.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <BrowserRouter>
