@@ -25,11 +25,8 @@ html.theme-light .sidebar {
 }
 
 .sidebar-logo-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-orange));
-  box-shadow: 0 0 20px rgba(106, 13, 173, 0.4);
+  display: block;
+  flex-shrink: 0;
 }
 
 .sidebar-logo-text {

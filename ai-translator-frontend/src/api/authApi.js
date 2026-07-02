@@ -2,7 +2,7 @@
  * authApi.js — Authentication via VoxAI FastAPI backend.
  */
 
-import api from './api';
+const FASTAPI_ROOT = import.meta.env.VITE_API_URL || 'https://voxai-python-api.onrender.com';
 
 function normalizeAuthResponse(data, fallbackEmail, fallbackName) {
   if (data?.error) {
@@ -19,8 +19,25 @@ function normalizeAuthResponse(data, fallbackEmail, fallbackName) {
   };
 }
 
+async function postFastApiAuth(path, payload) {
+  const res = await fetch(`${FASTAPI_ROOT}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const message = data?.error || data?.detail || `Request failed with status code ${res.status}`;
+    throw new Error(message);
+  }
+
+  return data;
+}
+
 export async function registerUser(name, email, password) {
-  const { data } = await api.post('/register', {
+  const data = await postFastApiAuth('/register', {
     name,
     email,
     password,
@@ -40,7 +57,7 @@ export async function loginUser(email, password) {
     };
   }
 
-  const { data } = await api.post('/login', {
+  const data = await postFastApiAuth('/login', {
     email,
     password,
   });
@@ -49,17 +66,20 @@ export async function loginUser(email, password) {
 }
 
 export async function fetchAdminUsers() {
-  const { data } = await api.get('/admin/users');
+  const res = await fetch(`${FASTAPI_ROOT}/admin/users`);
+  const data = await res.json().catch(() => []);
+
+  if (!res.ok) {
+    const message = data?.error || data?.detail || `Request failed with status code ${res.status}`;
+    throw new Error(message);
+  }
+
   return data;
 }
 
 export async function checkBackendHealth() {
   try {
-    const root = import.meta.env.DEV
-      ? ''
-      : (import.meta.env.VITE_API_URL || 'http://localhost:5000');
-
-    const res = await fetch(`${root}/`, {
+    const res = await fetch(`${FASTAPI_ROOT}/`, {
       signal: AbortSignal.timeout(3000),
     });
 

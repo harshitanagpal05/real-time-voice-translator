@@ -37,11 +37,8 @@
 }
 
 .auth-logo-mark {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #6A0DAD, #FF8C00);
-  box-shadow: 0 0 30px rgba(106, 13, 173, 0.5);
+  display: block;
+  flex-shrink: 0;
 }
 
 .auth-logo-text {

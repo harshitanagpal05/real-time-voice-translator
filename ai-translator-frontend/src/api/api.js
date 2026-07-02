@@ -5,9 +5,7 @@
 import axios from 'axios';
 import { getToken } from '../utils/session';
 
-const API_ROOT = import.meta.env.DEV
-  ? ''
-  : (import.meta.env.VITE_API_URL || 'http://localhost:5000');
+const API_ROOT = import.meta.env.VITE_API_URL || 'https://voxai-python-api.onrender.com';
 
 const api = axios.create({
   baseURL: API_ROOT,

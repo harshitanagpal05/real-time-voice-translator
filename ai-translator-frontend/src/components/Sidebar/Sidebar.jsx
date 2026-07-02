@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import BrandMark from '../BrandMark/BrandMark';
 import './Sidebar.css';
 
 const NAV_ITEMS = [
@@ -30,7 +31,7 @@ export default function Sidebar({
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
-        <span className="sidebar-logo-mark" />
+        <BrandMark size={32} className="sidebar-logo-mark" />
         <span className="sidebar-logo-text">VoxAI</span>
       </div>
 

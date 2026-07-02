@@ -6,6 +6,7 @@
 import { motion } from 'framer-motion';
 import AnimatedBackground from '../AnimatedBackground/AnimatedBackground';
 import AuthOrb from './AuthOrb';
+import BrandMark from '../BrandMark/BrandMark';
 import './Auth.css';
 
 export default function AuthLayout({ children, title, subtitle }) {
@@ -22,7 +23,7 @@ export default function AuthLayout({ children, title, subtitle }) {
         >
           <div className="auth-brand-inner">
             <div className="auth-logo-row">
-              <span className="auth-logo-mark" />
+              <BrandMark size={36} className="auth-logo-mark" />
               <span className="auth-logo-text">VoxAI</span>
             </div>
 
@@ -66,7 +67,7 @@ export default function AuthLayout({ children, title, subtitle }) {
           transition={{ duration: 0.6, delay: 0.15 }}
         >
           <div className="auth-mobile-brand">
-            <span className="auth-logo-mark" />
+            <BrandMark size={36} className="auth-logo-mark" />
             <span className="auth-logo-text">VoxAI</span>
           </div>
           <div className="auth-form-card">

@@ -4,6 +4,7 @@
  */
 
 import { motion } from 'framer-motion';
+import BrandMark from '../BrandMark/BrandMark';
 import './Navbar.css';
 
 const NAV_LINKS = [
@@ -37,7 +38,7 @@ export default function Navbar({
     >
       <div className="navbar-inner">
         <a href="#hero" className="navbar-logo" onClick={(e) => { e.preventDefault(); scrollTo('#hero'); }}>
-          <span className="navbar-logo-mark" />
+          <BrandMark size={28} className="navbar-logo-mark" />
           <span className="navbar-logo-text">VoxAI</span>
         </a>
 
