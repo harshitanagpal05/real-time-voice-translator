@@ -23,9 +23,16 @@ export const DEFAULT_SETTINGS = {
 export function loadSettings() {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
-    return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : { ...DEFAULT_SETTINGS };
+    const loaded = raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : { ...DEFAULT_SETTINGS };
+    return {
+      ...loaded,
+      accentTheme: DEFAULT_SETTINGS.accentTheme,
+    };
   } catch {
-    return { ...DEFAULT_SETTINGS };
+    return {
+      ...DEFAULT_SETTINGS,
+      accentTheme: DEFAULT_SETTINGS.accentTheme,
+    };
   }
 }
 
